@@ -1,0 +1,26 @@
+[
+  {
+    "id": "cat-sample-packs",
+    "name": "Sample Packs",
+    "slug": "sample-packs",
+    "description": "Curated vocal chops, drums, textures, and melodic phrases."
+  },
+  {
+    "id": "cat-flp",
+    "name": "FLP Projects",
+    "slug": "flp-projects",
+    "description": "Ready-to-study production sessions with arrangement insights."
+  },
+  {
+    "id": "cat-loops",
+    "name": "Loops",
+    "slug": "loops",
+    "description": "Genre-ready loop kits for cinematic, trap, and Afro inspired tracks."
+  },
+  {
+    "id": "cat-software",
+    "name": "Software",
+    "slug": "software",
+    "description": "Templates, presets, and utility tools for faster production."
+  }
+]

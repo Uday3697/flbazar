@@ -1,65 +1,259 @@
 import Image from "next/image";
+import Link from "next/link";
+import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
+import { ProductCard } from "@/components/product-card";
+import { createSupportTicketAction } from "@/lib/actions";
+import { getCategories, getProducts, getSiteSettings } from "@/lib/data-store";
+import { getPalette } from "@/lib/theme";
+import { formatPrice } from "@/lib/utils";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ success?: string; error?: string }>;
+}) {
+  const query = await searchParams;
+  const [categories, products, settings] = await Promise.all([getCategories(), getProducts(), getSiteSettings()]);
+  const categoryMap = new Map(categories.map((category) => [category.slug, category.name]));
+  const featuredProduct = products[0];
+  const palette = getPalette(settings.paletteKey);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <>
+      <Header />
+      <main className="relative overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(249,115,22,0.22),transparent_32%),radial-gradient(circle_at_top_right,rgba(236,72,153,0.18),transparent_28%),radial-gradient(circle_at_bottom,rgba(56,189,248,0.16),transparent_38%)]" />
+
+        <section className="mx-auto grid w-full max-w-7xl gap-10 px-6 py-16 lg:grid-cols-[1.2fr_0.8fr] lg:px-10 lg:py-24">
+          <div className="space-y-8">
+            <div className={`inline-flex rounded-full px-4 py-2 text-xs uppercase tracking-[0.35em] ${palette.badge}`}>
+              {settings.heroBadge}
+            </div>
+
+            <div className="space-y-5">
+              <h1 className="max-w-4xl text-5xl font-black uppercase leading-[0.95] tracking-[0.02em] text-white md:text-7xl">
+                {settings.heroHeading}
+              </h1>
+              <p className="max-w-2xl text-lg leading-8 text-slate-300">{settings.heroDescription}</p>
+            </div>
+
+            <div className="flex flex-wrap gap-4">
+              <Link
+                href="#catalogue"
+                className={`rounded-full px-6 py-3 text-sm font-semibold transition hover:scale-[1.02] ${palette.primaryButton}`}
+              >
+                Explore Products
+              </Link>
+              <Link
+                href="#support"
+                className={`rounded-full px-6 py-3 text-sm font-semibold transition ${palette.secondaryButton}`}
+              >
+                Contact Support
+              </Link>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className={`rounded-[1.75rem] border p-5 ${palette.card}`}>
+                <p className="text-3xl font-black text-white">{products.length}</p>
+                <p className="mt-2 text-sm text-slate-300">Live product listings across your store.</p>
+              </div>
+              <div className={`rounded-[1.75rem] border p-5 ${palette.card}`}>
+                <p className="text-3xl font-black text-white">{categories.length}</p>
+                <p className="mt-2 text-sm text-slate-300">Category shelves for every release format.</p>
+              </div>
+              <div className={`rounded-[1.75rem] border p-5 ${palette.card}`}>
+                <p className="text-3xl font-black text-white">24/7</p>
+                <p className="mt-2 text-sm text-slate-300">Support tickets for payment, refund, and download issues.</p>
+              </div>
+            </div>
+          </div>
+
+          {featuredProduct ? (
+            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-[0_30px_100px_rgba(0,0,0,0.35)] backdrop-blur">
+              <div className={`rounded-[1.75rem] bg-gradient-to-br ${featuredProduct.accent} p-8`}>
+                <p className="text-xs uppercase tracking-[0.35em] text-slate-950/70">Featured release</p>
+                <h2 className="mt-4 text-4xl font-black uppercase leading-none text-slate-950">
+                  {featuredProduct.title}
+                </h2>
+                <p className="mt-6 max-w-md text-sm leading-7 text-slate-950/80">{featuredProduct.description}</p>
+              </div>
+              <div className="mt-6 flex items-center justify-between gap-4">
+                <div>
+                  <p className={`text-sm uppercase tracking-[0.3em] ${palette.accentText}`}>
+                    {categoryMap.get(featuredProduct.categorySlug)}
+                  </p>
+                  <p className="mt-2 text-3xl font-bold text-white">{formatPrice(featuredProduct.price)}</p>
+                </div>
+                <Link
+                  href={`/products/${featuredProduct.slug}`}
+                  className={`rounded-full px-5 py-3 text-sm font-semibold ${palette.primaryButton}`}
+                >
+                  Preview & Buy
+                </Link>
+              </div>
+            </div>
+          ) : null}
+        </section>
+
+        <section className="mx-auto w-full max-w-7xl px-6 pb-8 lg:px-10">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {categories.map((category) => (
+              <div key={category.id} className="rounded-[1.75rem] border border-white/10 bg-slate-900/70 p-6">
+                <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>{category.name}</p>
+                <p className="mt-4 text-sm leading-7 text-slate-300">{category.description}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="catalogue" className="mx-auto w-full max-w-7xl px-6 py-16 lg:px-10">
+          <div className="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>Catalogue</p>
+              <h2 className="mt-3 text-4xl font-black uppercase text-white">{settings.catalogueHeading}</h2>
+            </div>
+            <p className="max-w-2xl text-sm leading-7 text-slate-300">{settings.catalogueDescription}</p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {products.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                categoryName={categoryMap.get(product.categorySlug) ?? "Uncategorized"}
+              />
+            ))}
+          </div>
+        </section>
+
+        <section id="gallery" className="mx-auto w-full max-w-7xl px-6 pb-16 lg:px-10">
+          <div className="mb-8">
+            <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>Gallery</p>
+            <h2 className="mt-3 text-4xl font-black uppercase text-white">Editable music gallery</h2>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-300">
+              Admin can swap these image URLs from the dashboard whenever the brand style changes.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {settings.galleryImages.map((image, index) => (
+              <div key={`${image}-${index}`} className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900">
+                <Image
+                  src={image}
+                  alt={`${settings.brandName} gallery ${index + 1}`}
+                  width={1200}
+                  height={900}
+                  className="h-80 w-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="portfolio" className="mx-auto w-full max-w-7xl px-6 pb-20 lg:px-10">
+          <div className="grid gap-8 rounded-[2rem] border border-white/10 bg-white/5 p-8 lg:grid-cols-[0.9fr_1.1fr]">
+            <div className="space-y-5">
+              <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>Portfolio</p>
+              <h2 className="text-4xl font-black uppercase text-white">{settings.portfolioHeading}</h2>
+              <p className="text-sm leading-7 text-slate-300">{settings.portfolioDescription}</p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="rounded-[1.5rem] bg-slate-900 p-5">
+                <p className="text-3xl font-black text-white">120+</p>
+                <p className="mt-2 text-sm text-slate-300">Ideas translated into ready-to-use production assets.</p>
+              </div>
+              <div className="rounded-[1.5rem] bg-slate-900 p-5">
+                <p className="text-3xl font-black text-white">{categories.length}</p>
+                <p className="mt-2 text-sm text-slate-300">Managed categories and content sections.</p>
+              </div>
+              <div className="rounded-[1.5rem] bg-slate-900 p-5">
+                <p className="text-3xl font-black text-white">100%</p>
+                <p className="mt-2 text-sm text-slate-300">Encrypted delivery route after successful checkout.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="support" className="mx-auto w-full max-w-7xl px-6 pb-20 lg:px-10">
+          {query.success ? (
+            <p className="mb-6 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+              {query.success}
+            </p>
+          ) : null}
+          {query.error ? (
+            <p className="mb-6 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+              {query.error}
+            </p>
+          ) : null}
+          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+            <div className="rounded-[2rem] border border-white/10 bg-slate-900 p-8">
+              <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>Support</p>
+              <h2 className="mt-3 text-4xl font-black uppercase text-white">{settings.contactHeading}</h2>
+              <p className="mt-4 text-sm leading-7 text-slate-300">{settings.contactDescription}</p>
+              <div className="mt-6 space-y-2 text-sm text-slate-300">
+                <p>Email: {settings.supportEmail}</p>
+                <p>Phone: {settings.supportPhone}</p>
+                <p>WhatsApp: {settings.supportWhatsapp}</p>
+                <p>Instagram: {settings.supportInstagram}</p>
+              </div>
+            </div>
+
+            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8">
+              <h3 className="text-2xl font-black uppercase text-white">Payment or download issue form</h3>
+              <form action={createSupportTicketAction} className="mt-6 grid gap-4 md:grid-cols-2">
+                <input type="hidden" name="orderId" value="" />
+                <input type="hidden" name="productSlug" value="" />
+                <input type="hidden" name="returnPath" value="/" />
+                <input
+                  required
+                  name="customerName"
+                  placeholder="Your name"
+                  className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
+                />
+                <input
+                  required
+                  type="email"
+                  name="customerEmail"
+                  placeholder="Your email"
+                  className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
+                />
+                <input
+                  required
+                  name="customerPhone"
+                  placeholder="Mobile number"
+                  className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
+                />
+                <select
+                  name="issueType"
+                  defaultValue="payment"
+                  className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
+                >
+                  <option value="payment">Payment deducted</option>
+                  <option value="download">Download failed</option>
+                  <option value="refund">Refund request</option>
+                  <option value="access">Password/access issue</option>
+                  <option value="other">Other issue</option>
+                </select>
+                <textarea
+                  required
+                  rows={5}
+                  name="message"
+                  placeholder="Write what happened. Add order ID or payment reference if available."
+                  className="md:col-span-2 rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
+                />
+                <div className="md:col-span-2">
+                  <button className={`rounded-full px-6 py-3 text-sm font-semibold ${palette.primaryButton}`}>
+                    Submit support ticket
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </section>
       </main>
-    </div>
+      <Footer />
+    </>
   );
 }

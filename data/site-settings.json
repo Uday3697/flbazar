@@ -1,0 +1,27 @@
+{
+  "id": "site-settings",
+  "brandName": "Flbazar.in",
+  "sellerName": "Sudip Mandal",
+  "logoText": "FL",
+  "siteTitle": "Flbazar.in by Sudip Mandal",
+  "heroBadge": "Digital marketplace for producers",
+  "heroHeading": "Sell sample packs, FLPs, loops, and software from one powerful music storefront.",
+  "heroDescription": "Flbazar.in is a clean producer website for Sudip Mandal with encrypted delivery, buyer issue tracking, and a visual homepage the admin can edit anytime.",
+  "catalogueHeading": "Latest products on the homepage",
+  "catalogueDescription": "Every new product created from the admin panel shows here automatically, organized by category and ready for purchase.",
+  "portfolioHeading": "About seller Sudip Mandal",
+  "portfolioDescription": "Sudip Mandal creates modern production assets with practical arrangement ideas, polished sound design, and workflow tools built for producers.",
+  "contactHeading": "Need help with payment, refund, or download access?",
+  "contactDescription": "If money was deducted, the file did not download, or access was blocked, the buyer can submit a support ticket with order ID, phone, and issue details.",
+  "footerNote": "Flbazar.in is built for fast digital music delivery with admin-managed branding and homepage content.",
+  "supportEmail": "support@flbazar.in",
+  "supportPhone": "+91 90000 12345",
+  "supportWhatsapp": "+91 90000 12345",
+  "supportInstagram": "@sudipmandal.music",
+  "paletteKey": "sunset-stage",
+  "galleryImages": [
+    "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=80"
+  ]
+}
