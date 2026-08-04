@@ -1,7 +1,7 @@
 import { createCipheriv, createDecipheriv, createHmac, randomBytes, scryptSync } from "node:crypto";
 import { cookies } from "next/headers";
 
-type DownloadPayload = {
+export type DownloadTokenPayload = {
   orderId: string;
   productSlug: string;
   expiresAt: number;
@@ -32,7 +32,7 @@ export async function isAdminAuthenticated() {
   return store.get("admin_session")?.value === createAdminSessionToken();
 }
 
-export function encryptDownloadToken(payload: DownloadPayload) {
+export function encryptDownloadToken(payload: DownloadTokenPayload) {
   const iv = randomBytes(12);
   const cipher = createCipheriv("aes-256-gcm", getEncryptionKey(), iv);
   const encrypted = Buffer.concat([cipher.update(JSON.stringify(payload), "utf8"), cipher.final()]);
@@ -55,5 +55,5 @@ export function decryptDownloadToken(token: string) {
     decipher.final(),
   ]);
 
-  return JSON.parse(decrypted.toString("utf8")) as DownloadPayload;
+  return JSON.parse(decrypted.toString("utf8")) as DownloadTokenPayload;
 }

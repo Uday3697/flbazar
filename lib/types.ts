@@ -25,14 +25,22 @@ export type Product = {
 export type OrderStatus = "paid" | "failed" | "refunded";
 export type DownloadStatus = "pending" | "success" | "failed";
 
+export type OrderItem = {
+  productSlug: string;
+  title: string;
+  price: number;
+};
+
 export type Order = {
   id: string;
-  productSlug: string;
+  items: OrderItem[];
   customerName: string;
   customerEmail: string;
   customerPhone: string;
   amount: number;
   paymentReference: string;
+  razorpayOrderId: string;
+  razorpayPaymentId?: string;
   status: OrderStatus;
   downloadStatus: DownloadStatus;
   createdAt: string;

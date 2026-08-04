@@ -3,6 +3,7 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { Category, Order, SiteSettings, SupportTicket, Product } from "@/lib/types";
 import { slugify } from "@/lib/utils";
+import { encryptDownloadToken, type DownloadTokenPayload } from "@/lib/security";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const CATEGORY_FILE = path.join(DATA_DIR, "categories.json");
@@ -269,22 +270,25 @@ export async function createProduct(input: {
   return product;
 }
 
-export async function createOrder(input: {
-  productSlug: string;
+export async function createOrderWithItems(input: {
+  items: Array<{ productSlug: string; title: string; price: number }>;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
   amount: number;
+  razorpayOrderId: string;
 }) {
   const orders = await getOrders();
+
   const order: Order = {
     id: randomUUID(),
-    productSlug: input.productSlug,
+    items: input.items,
     customerName: input.customerName.trim(),
     customerEmail: input.customerEmail.trim(),
     customerPhone: input.customerPhone.trim(),
     amount: input.amount,
     paymentReference: `PAY-${randomUUID().slice(0, 8).toUpperCase()}`,
+    razorpayOrderId: input.razorpayOrderId,
     status: "paid",
     downloadStatus: "pending",
     createdAt: new Date().toISOString(),
@@ -293,6 +297,70 @@ export async function createOrder(input: {
   const nextOrders = [order, ...orders];
   await writeCollection(ORDER_FILE, nextOrders);
   return order;
+}
+
+export async function getOrderByEmailOrPhone(email: string, phone: string) {
+  const orders = await getOrders();
+  return orders.filter(
+    (order) =>
+      order.customerEmail.toLowerCase() === email.toLowerCase() ||
+      order.customerPhone === phone,
+  );
+}
+
+export async function getOrderItemDownloadToken(
+  orderId: string,
+  productSlug: string,
+): Promise<string> {
+  const order = await getOrderById(orderId);
+
+  if (!order) {
+    throw new Error("Order not found");
+  }
+
+  const item = order.items.find((i) => i.productSlug === productSlug);
+  if (!item) {
+    throw new Error("Product not found in this order");
+  }
+
+  const expiresAt = new Date(order.createdAt).getTime() + 30 * 24 * 60 * 60 * 1000; // 30 days
+
+  const payload: DownloadTokenPayload = {
+    orderId,
+    productSlug,
+    expiresAt,
+  };
+
+  return encryptDownloadToken(payload);
+}
+
+export async function createOrder(input: {
+  productSlug: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone: string;
+  amount: number;
+}) {
+  // Get product to fetch title
+  const product = await getProductBySlug(input.productSlug);
+  if (!product) {
+    throw new Error("Product not found");
+  }
+
+  return createOrderWithItems({
+    items: [
+      {
+        productSlug: input.productSlug,
+        title: product.title,
+        price: input.amount,
+      },
+    ],
+    customerName: input.customerName,
+    customerEmail: input.customerEmail,
+    customerPhone: input.customerPhone,
+    amount: input.amount,
+    razorpayOrderId: `OLD-${randomUUID().slice(0, 8).toUpperCase()}`,
+  });
 }
 
 export async function updateOrderStatus(
