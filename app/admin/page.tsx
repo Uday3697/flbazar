@@ -284,7 +284,7 @@ export default async function AdminPage({
                   {orders.length === 0 ? <p className="text-sm text-slate-400">No orders yet.</p> : null}
                   {orders.slice(0, 8).map((order) => (
                     <div key={order.id} className="rounded-[1.5rem] bg-slate-950 p-4">
-                      <p className="text-sm font-semibold text-white">{order.productSlug}</p>
+                      <p className="text-sm font-semibold text-white">{order.items.map((i) => i.title).join(", ")}</p>
                       <p className="mt-1 text-xs uppercase tracking-[0.25em] text-orange-200">{order.paymentReference}</p>
                       <p className="mt-2 text-sm text-slate-400">{order.customerName} • {order.customerPhone}</p>
                       <form action={updateOrderStatusAction} className="mt-4 grid gap-3">

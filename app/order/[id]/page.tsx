@@ -25,7 +25,7 @@ export default async function OrderPage({
     notFound();
   }
 
-  const [product, settings] = await Promise.all([getProductBySlug(order.productSlug), getSiteSettings()]);
+  const [product, settings] = await Promise.all([getProductBySlug(order.items[0]?.productSlug ?? ""), getSiteSettings()]);
 
   if (!product) {
     notFound();
