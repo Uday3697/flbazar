@@ -23,7 +23,7 @@ export async function loginAdmin(formData: FormData) {
   ].filter(Boolean);
 
   if (!validPasswords.includes(password)) {
-    redirect("/admin?error=Wrong%20password");
+    redirect("/panel?error=Wrong%20password");
   }
 
   const store = await cookies();
@@ -34,18 +34,18 @@ export async function loginAdmin(formData: FormData) {
     secure: process.env.NODE_ENV === "production",
   });
 
-  redirect("/admin?success=Logged%20in");
+  redirect("/panel?success=Logged%20in");
 }
 
 export async function logoutAdmin() {
   const store = await cookies();
   store.delete("admin_session");
-  redirect("/admin?success=Logged%20out");
+  redirect("/panel?success=Logged%20out");
 }
 
 export async function createCategoryAction(formData: FormData) {
   if (!(await isAdminAuthenticated())) {
-    redirect("/admin?error=Please%20login%20again");
+    redirect("/panel?error=Please%20login%20again");
   }
 
   const name = String(formData.get("name") || "");
@@ -53,16 +53,16 @@ export async function createCategoryAction(formData: FormData) {
   const description = String(formData.get("description") || "");
 
   if (!name || !description) {
-    redirect("/admin?error=Category%20name%20and%20description%20are%20required");
+    redirect("/panel?error=Category%20name%20and%20description%20are%20required");
   }
 
   await createCategory({ name, slug, description });
-  redirect("/admin?success=Category%20created");
+  redirect("/panel?success=Category%20created");
 }
 
 export async function createProductAction(formData: FormData) {
   if (!(await isAdminAuthenticated())) {
-    redirect("/admin?error=Please%20login%20again");
+    redirect("/panel?error=Please%20login%20again");
   }
 
   const title = String(formData.get("title") || "");
@@ -89,7 +89,7 @@ export async function createProductAction(formData: FormData) {
     !downloadPassword ||
     !price
   ) {
-    redirect("/admin?error=Please%20fill%20all%20required%20product%20fields");
+    redirect("/panel?error=Please%20fill%20all%20required%20product%20fields");
   }
 
   await createProduct({
@@ -107,12 +107,12 @@ export async function createProductAction(formData: FormData) {
     accent,
   });
 
-  redirect("/admin?success=Product%20published");
+  redirect("/panel?success=Product%20published");
 }
 
 export async function updateSiteSettingsAction(formData: FormData) {
   if (!(await isAdminAuthenticated())) {
-    redirect("/admin?error=Please%20login%20again");
+    redirect("/panel?error=Please%20login%20again");
   }
 
   const galleryImages = String(formData.get("galleryImages") || "")
@@ -144,7 +144,7 @@ export async function updateSiteSettingsAction(formData: FormData) {
   };
 
   await updateSiteSettings(updates);
-  redirect("/admin?success=Website%20settings%20updated");
+  redirect("/panel?success=Website%20settings%20updated");
 }
 
 export async function createOrderAction(formData: FormData) {
@@ -214,7 +214,7 @@ export async function createSupportTicketAction(formData: FormData) {
 
 export async function updateOrderStatusAction(formData: FormData) {
   if (!(await isAdminAuthenticated())) {
-    redirect("/admin?error=Please%20login%20again");
+    redirect("/panel?error=Please%20login%20again");
   }
 
   const orderId = String(formData.get("orderId") || "");
@@ -222,28 +222,28 @@ export async function updateOrderStatusAction(formData: FormData) {
   const downloadStatus = String(formData.get("downloadStatus") || "") as DownloadStatus;
 
   if (!orderId) {
-    redirect("/admin?error=Order%20not%20found");
+    redirect("/panel?error=Order%20not%20found");
   }
 
   await updateOrderStatus(orderId, {
     status,
     downloadStatus,
   });
-  redirect("/admin?success=Order%20updated");
+  redirect("/panel?success=Order%20updated");
 }
 
 export async function updateTicketStatusAction(formData: FormData) {
   if (!(await isAdminAuthenticated())) {
-    redirect("/admin?error=Please%20login%20again");
+    redirect("/panel?error=Please%20login%20again");
   }
 
   const ticketId = String(formData.get("ticketId") || "");
   const status = String(formData.get("status") || "") as SupportTicket["status"];
 
   if (!ticketId) {
-    redirect("/admin?error=Ticket%20not%20found");
+    redirect("/panel?error=Ticket%20not%20found");
   }
 
   await updateTicketStatus(ticketId, status);
-  redirect("/admin?success=Ticket%20updated");
+  redirect("/panel?success=Ticket%20updated");
 }
