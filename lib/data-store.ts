@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import type { Category, Order, SiteSettings, SupportTicket, Product } from "@/lib/types";
 import { slugify } from "@/lib/utils";
 import { encryptDownloadToken, type DownloadTokenPayload } from "@/lib/security";
+import { getDb } from "@/lib/mongodb";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const CATEGORY_FILE = path.join(DATA_DIR, "categories.json");
@@ -175,16 +176,20 @@ export async function getProducts() {
   return readCollection(PRODUCT_FILE, seededProducts);
 }
 
-export async function getOrders() {
-  return readCollection(ORDER_FILE, [] as Order[]);
+export async function getOrders(): Promise<Order[]> {
+  const db = await getDb();
+  const docs = await db.collection("orders").find({}).sort({ createdAt: -1 }).toArray();
+  return docs.map(({ _id, ...rest }) => rest as Order);
 }
 
 export async function getSiteSettings() {
   return readCollection(SETTINGS_FILE, seededSiteSettings);
 }
 
-export async function getSupportTickets() {
-  return readCollection(TICKET_FILE, [] as SupportTicket[]);
+export async function getSupportTickets(): Promise<SupportTicket[]> {
+  const db = await getDb();
+  const docs = await db.collection("support_tickets").find({}).sort({ createdAt: -1 }).toArray();
+  return docs.map(({ _id, ...rest }) => rest as SupportTicket);
 }
 
 export async function getProductBySlug(slug: string) {
@@ -192,9 +197,12 @@ export async function getProductBySlug(slug: string) {
   return products.find((product) => product.slug === slug) ?? null;
 }
 
-export async function getOrderById(id: string) {
-  const orders = await getOrders();
-  return orders.find((order) => order.id === id) ?? null;
+export async function getOrderById(id: string): Promise<Order | null> {
+  const db = await getDb();
+  const doc = await db.collection("orders").findOne({ id });
+  if (!doc) return null;
+  const { _id, ...rest } = doc;
+  return rest as Order;
 }
 
 export async function createCategory(input: {
@@ -277,9 +285,7 @@ export async function createOrderWithItems(input: {
   customerPhone: string;
   amount: number;
   razorpayOrderId: string;
-}) {
-  const orders = await getOrders();
-
+}): Promise<Order> {
   const order: Order = {
     id: randomUUID(),
     items: input.items,
@@ -294,18 +300,20 @@ export async function createOrderWithItems(input: {
     createdAt: new Date().toISOString(),
   };
 
-  const nextOrders = [order, ...orders];
-  await writeCollection(ORDER_FILE, nextOrders);
+  const db = await getDb();
+  await db.collection("orders").insertOne({ ...order });
   return order;
 }
 
-export async function getOrderByEmailOrPhone(email: string, phone: string) {
-  const orders = await getOrders();
-  return orders.filter(
-    (order) =>
-      order.customerEmail.toLowerCase() === email.toLowerCase() ||
-      order.customerPhone === phone,
-  );
+export async function getOrderByEmailOrPhone(email: string, phone: string): Promise<Order[]> {
+  const db = await getDb();
+  const docs = await db.collection("orders").find({
+    $or: [
+      { customerEmail: { $regex: new RegExp(`^${email}$`, "i") } },
+      { customerPhone: phone },
+    ],
+  }).sort({ createdAt: -1 }).toArray();
+  return docs.map(({ _id, ...rest }) => rest as Order);
 }
 
 export async function getOrderItemDownloadToken(
@@ -366,11 +374,10 @@ export async function createOrder(input: {
 export async function updateOrderStatus(
   id: string,
   updates: Partial<Pick<Order, "status" | "downloadStatus">>,
-) {
-  const orders = await getOrders();
-  const nextOrders = orders.map((order) => (order.id === id ? { ...order, ...updates } : order));
-  await writeCollection(ORDER_FILE, nextOrders);
-  return nextOrders.find((order) => order.id === id) ?? null;
+): Promise<Order | null> {
+  const db = await getDb();
+  await db.collection("orders").updateOne({ id }, { $set: updates });
+  return getOrderById(id);
 }
 
 export async function updateSiteSettings(updates: Partial<SiteSettings>) {
@@ -388,8 +395,7 @@ export async function createSupportTicket(input: {
   customerPhone: string;
   issueType: SupportTicket["issueType"];
   message: string;
-}) {
-  const tickets = await getSupportTickets();
+}): Promise<SupportTicket> {
   const ticket: SupportTicket = {
     id: randomUUID(),
     orderId: input.orderId.trim(),
@@ -403,14 +409,16 @@ export async function createSupportTicket(input: {
     createdAt: new Date().toISOString(),
   };
 
-  const nextTickets = [ticket, ...tickets];
-  await writeCollection(TICKET_FILE, nextTickets);
+  const db = await getDb();
+  await db.collection("support_tickets").insertOne({ ...ticket });
   return ticket;
 }
 
-export async function updateTicketStatus(id: string, status: SupportTicket["status"]) {
-  const tickets = await getSupportTickets();
-  const nextTickets = tickets.map((ticket) => (ticket.id === id ? { ...ticket, status } : ticket));
-  await writeCollection(TICKET_FILE, nextTickets);
-  return nextTickets.find((ticket) => ticket.id === id) ?? null;
+export async function updateTicketStatus(id: string, status: SupportTicket["status"]): Promise<SupportTicket | null> {
+  const db = await getDb();
+  await db.collection("support_tickets").updateOne({ id }, { $set: { status } });
+  const doc = await db.collection("support_tickets").findOne({ id });
+  if (!doc) return null;
+  const { _id, ...rest } = doc;
+  return rest as SupportTicket;
 }
