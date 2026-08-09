@@ -17,9 +17,12 @@ import type { DownloadStatus, OrderStatus, SiteSettings, SupportTicket } from "@
 
 export async function loginAdmin(formData: FormData) {
   const password = String(formData.get("password") || "");
-  const expected = process.env.ADMIN_PASSWORD || "Admin@12345";
+  const validPasswords = [
+    process.env.ADMIN_PASSWORD_1,
+    process.env.ADMIN_PASSWORD_2,
+  ].filter(Boolean);
 
-  if (password !== expected) {
+  if (!validPasswords.includes(password)) {
     redirect("/admin?error=Wrong%20password");
   }
 
