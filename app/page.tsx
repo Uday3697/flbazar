@@ -7,6 +7,7 @@ import { ProductCard } from "@/components/product-card";
 import HeroTextRotator from "@/components/hero-text-rotator";
 import RandomBg from "@/components/random-bg";
 import CategoryFilter from "@/components/category-filter";
+import MarqueeTicker from "@/components/marquee-ticker";
 import { createSupportTicketAction } from "@/lib/actions";
 import { getCategories, getProducts, getSiteSettings } from "@/lib/data-store";
 import { getPalette } from "@/lib/theme";
@@ -151,23 +152,29 @@ export default async function Home({
           )}
         </section>
 
+        <MarqueeTicker />
+
         <section id="gallery" className="mx-auto w-full max-w-7xl px-6 pb-16 lg:px-10">
           <div className="mb-8">
-            <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>Gallery</p>
-            <h2 className="mt-3 text-4xl font-black uppercase text-white">Editable music gallery</h2>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-300">
-              Admin can swap these image URLs from the dashboard whenever the brand style changes.
-            </p>
+            <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>Studio Vibes</p>
+            <h2 className="mt-3 text-4xl font-black uppercase text-white">Music Production Gallery</h2>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
-            {settings.galleryImages.map((image, index) => (
-              <div key={`${image}-${index}`} className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900">
+            {[
+              { src: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&w=800&q=80", alt: "FL Studio DAW" },
+              { src: "https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?auto=format&fit=crop&w=800&q=80", alt: "Piano keys" },
+              { src: "https://images.unsplash.com/photo-1571327073757-71d13b9f8a60?auto=format&fit=crop&w=800&q=80", alt: "Drum kit" },
+              { src: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80", alt: "Music producer studio" },
+              { src: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=800&q=80", alt: "DJ setup" },
+              { src: "https://images.unsplash.com/photo-1614854262318-831574f15f1f?auto=format&fit=crop&w=800&q=80", alt: "Audio mixer" },
+            ].map((img, index) => (
+              <div key={index} className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900 group">
                 <Image
-                  src={image}
-                  alt={`${settings.brandName} gallery ${index + 1}`}
-                  width={1200}
-                  height={900}
-                  className="h-80 w-full object-cover"
+                  src={img.src}
+                  alt={img.alt}
+                  width={800}
+                  height={600}
+                  className="h-64 w-full object-cover transition duration-500 group-hover:scale-105"
                 />
               </div>
             ))}

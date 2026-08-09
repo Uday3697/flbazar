@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getSiteSettings } from "@/lib/data-store";
 import { getPalette } from "@/lib/theme";
@@ -18,9 +19,13 @@ export async function Header() {
     <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/80 backdrop-blur-xl">
       <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-4 lg:px-10">
         <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 via-fuchsia-500 to-sky-400 text-sm font-black uppercase tracking-[0.3em] text-slate-950">
-            {settings.logoText}
-          </div>
+          <Image
+            src="/favicon-logo.png"
+            alt="Flbaazar logo"
+            width={44}
+            height={44}
+            className="h-11 w-11 rounded-full object-cover"
+          />
           <div>
             <p className={`text-sm uppercase tracking-[0.35em] ${palette.accentText}`}>{settings.brandName}</p>
             <p className="text-xs text-slate-300">{settings.sellerName}</p>

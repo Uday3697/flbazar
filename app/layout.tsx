@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/data-store";
+import MouseCursor from "@/components/mouse-cursor";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -22,7 +23,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-slate-950 text-white">{children}</body>
+      <body className="min-h-full flex flex-col bg-slate-950 text-white">
+        <MouseCursor />
+        {children}
+      </body>
     </html>
   );
 }

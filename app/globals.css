@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #020617;
-  --foreground: #f8fafc;
+  --background: #0a0a0f;
+  --foreground: #f1f5f9;
   --muted: #94a3b8;
 }
 
@@ -19,6 +19,11 @@
 
 html {
   scroll-behavior: smooth;
+  cursor: none;
+}
+
+@media (pointer: coarse) {
+  html { cursor: auto; }
 }
 
 body {
@@ -29,34 +34,34 @@ body {
 
 .bg-gradient-1 {
   background-image:
-    linear-gradient(135deg, rgba(0,0,0,0.97) 0%, rgba(15,0,0,0.95) 100%),
-    radial-gradient(circle at 15% 20%, rgba(249,115,22,0.35) 0%, transparent 40%),
-    radial-gradient(circle at 85% 10%, rgba(234,179,8,0.25) 0%, transparent 35%),
-    radial-gradient(circle at 50% 90%, rgba(220,38,38,0.2) 0%, transparent 40%);
+    linear-gradient(160deg, #0a0a0f 0%, #1a0800 60%, #0a0a0f 100%),
+    radial-gradient(circle at 15% 20%, rgba(249,115,22,0.45) 0%, transparent 38%),
+    radial-gradient(circle at 85% 10%, rgba(234,179,8,0.3) 0%, transparent 32%),
+    radial-gradient(circle at 50% 90%, rgba(220,38,38,0.25) 0%, transparent 38%);
 }
 
 .bg-gradient-2 {
   background-image:
-    linear-gradient(135deg, rgba(0,0,0,0.97) 0%, rgba(10,0,15,0.95) 100%),
-    radial-gradient(circle at 80% 20%, rgba(236,72,153,0.35) 0%, transparent 40%),
-    radial-gradient(circle at 10% 70%, rgba(249,115,22,0.28) 0%, transparent 38%),
-    radial-gradient(circle at 50% 50%, rgba(234,179,8,0.15) 0%, transparent 45%);
+    linear-gradient(160deg, #0a0a0f 0%, #14000f 60%, #0a0a0f 100%),
+    radial-gradient(circle at 80% 20%, rgba(236,72,153,0.45) 0%, transparent 38%),
+    radial-gradient(circle at 10% 70%, rgba(249,115,22,0.32) 0%, transparent 36%),
+    radial-gradient(circle at 50% 50%, rgba(234,179,8,0.2) 0%, transparent 42%);
 }
 
 .bg-gradient-3 {
   background-image:
-    linear-gradient(135deg, rgba(0,0,0,0.97) 0%, rgba(5,5,0,0.95) 100%),
-    radial-gradient(circle at 20% 60%, rgba(234,179,8,0.32) 0%, transparent 40%),
-    radial-gradient(circle at 75% 25%, rgba(220,38,38,0.28) 0%, transparent 38%),
-    radial-gradient(circle at 50% 95%, rgba(249,115,22,0.2) 0%, transparent 40%);
+    linear-gradient(160deg, #0a0a0f 0%, #100800 60%, #0a0a0f 100%),
+    radial-gradient(circle at 20% 60%, rgba(234,179,8,0.42) 0%, transparent 38%),
+    radial-gradient(circle at 75% 25%, rgba(220,38,38,0.35) 0%, transparent 36%),
+    radial-gradient(circle at 50% 95%, rgba(249,115,22,0.25) 0%, transparent 38%);
 }
 
 .bg-gradient-4 {
   background-image:
-    linear-gradient(135deg, rgba(0,0,0,0.97) 0%, rgba(15,5,0,0.95) 100%),
-    radial-gradient(circle at 60% 15%, rgba(249,115,22,0.3) 0%, transparent 38%),
-    radial-gradient(circle at 20% 80%, rgba(236,72,153,0.25) 0%, transparent 40%),
-    radial-gradient(circle at 85% 70%, rgba(234,179,8,0.22) 0%, transparent 35%);
+    linear-gradient(160deg, #0a0a0f 0%, #180500 60%, #0a0a0f 100%),
+    radial-gradient(circle at 60% 15%, rgba(249,115,22,0.4) 0%, transparent 36%),
+    radial-gradient(circle at 20% 80%, rgba(236,72,153,0.32) 0%, transparent 38%),
+    radial-gradient(circle at 85% 70%, rgba(234,179,8,0.28) 0%, transparent 33%);
 }
 
 h1,
