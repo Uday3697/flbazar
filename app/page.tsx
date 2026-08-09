@@ -1,10 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { ProductCard } from "@/components/product-card";
 import HeroTextRotator from "@/components/hero-text-rotator";
 import RandomBg from "@/components/random-bg";
+import CategoryFilter from "@/components/category-filter";
 import { createSupportTicketAction } from "@/lib/actions";
 import { getCategories, getProducts, getSiteSettings } from "@/lib/data-store";
 import { getPalette } from "@/lib/theme";
@@ -15,11 +17,14 @@ export const dynamic = "force-dynamic";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ success?: string; error?: string }>;
+  searchParams: Promise<{ success?: string; error?: string; category?: string }>;
 }) {
   const query = await searchParams;
   const [categories, products, settings] = await Promise.all([getCategories(), getProducts(), getSiteSettings()]);
   const categoryMap = new Map(categories.map((category) => [category.slug, category.name]));
+  const filteredProducts = query.category
+    ? products.filter((p) => p.categorySlug === query.category)
+    : products;
   const featuredProduct = products[0];
   const palette = getPalette(settings.paletteKey);
 
@@ -119,7 +124,7 @@ export default async function Home({
         </section>
 
         <section id="catalogue" className="mx-auto w-full max-w-7xl px-6 py-16 lg:px-10">
-          <div className="mb-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>Catalogue</p>
               <h2 className="mt-3 text-4xl font-black uppercase text-white">{settings.catalogueHeading}</h2>
@@ -127,15 +132,23 @@ export default async function Home({
             <p className="max-w-2xl text-sm leading-7 text-slate-300">{settings.catalogueDescription}</p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                categoryName={categoryMap.get(product.categorySlug) ?? "Uncategorized"}
-              />
-            ))}
-          </div>
+          <Suspense>
+            <CategoryFilter categories={categories} />
+          </Suspense>
+
+          {filteredProducts.length === 0 ? (
+            <p className="text-slate-400 text-sm mt-4">No products in this category yet.</p>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  categoryName={categoryMap.get(product.categorySlug) ?? "Uncategorized"}
+                />
+              ))}
+            </div>
+          )}
         </section>
 
         <section id="gallery" className="mx-auto w-full max-w-7xl px-6 pb-16 lg:px-10">
