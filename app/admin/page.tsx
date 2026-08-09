@@ -105,7 +105,7 @@ export default async function AdminPage({
                   />
                   <input
                     name="slug"
-                    placeholder="Custom slug (optional)"
+                    placeholder="URL name, e.g. my-flp-pack (optional, auto-set from title)"
                     className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
                   />
                   <textarea
@@ -132,7 +132,7 @@ export default async function AdminPage({
                   />
                   <input
                     name="slug"
-                    placeholder="Custom slug (optional)"
+                    placeholder="URL name, e.g. my-flp-pack (optional, auto-set from title)"
                     className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
                   />
                   <select

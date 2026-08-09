@@ -55,7 +55,7 @@ export default function CheckoutForm({ items, onSuccess }: CheckoutFormProps) {
           key, // Razorpay Key ID
           amount: amountInPaise,
           currency: 'INR',
-          name: 'Flbazar',
+          name: 'Flbaazar',
           description: `Purchase ${items.length} product(s)`,
           order_id: razorpayOrderId,
           handler: async (response: any) => {

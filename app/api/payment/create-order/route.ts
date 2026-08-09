@@ -34,6 +34,10 @@ export async function POST(request: NextRequest) {
     const totalAmount = items.reduce((sum, item) => sum + item.price, 0);
     const amountInPaise = Math.round(totalAmount * 100);
 
+    if (amountInPaise < 100) {
+      return NextResponse.json({ error: "Minimum order amount is ₹1" }, { status: 400 });
+    }
+
     // Create Razorpay order
     const razorpay = initializeRazorpay();
     const razorpayOrder = await razorpay.orders.create({

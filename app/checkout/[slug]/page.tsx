@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-import { createOrderAction } from "@/lib/actions";
+import RazorpayCheckoutForm from "@/components/checkout/RazorpayCheckoutForm";
 import { getCategories, getProductBySlug, getSiteSettings } from "@/lib/data-store";
 import { getPalette } from "@/lib/theme";
 import { formatPrice } from "@/lib/utils";
@@ -11,13 +11,10 @@ export const dynamic = "force-dynamic";
 
 export default async function CheckoutPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ error?: string }>;
 }) {
   const { slug } = await params;
-  const query = await searchParams;
   const [product, categories, settings] = await Promise.all([
     getProductBySlug(slug),
     getCategories(),
@@ -39,60 +36,15 @@ export default async function CheckoutPage({
           <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>Checkout</p>
           <h1 className="mt-4 text-4xl font-black uppercase text-white">Complete payment for {product.title}</h1>
           <p className="mt-4 text-sm leading-7 text-slate-300">
-            This project still uses a demo payment success flow so the website works end-to-end immediately. Replace it
-            with Stripe or Razorpay webhooks before going live.
+            Fill in your details and click Pay. A secure Razorpay payment window will open.
           </p>
 
-          <form action={createOrderAction} className="mt-8 space-y-4">
-            <input type="hidden" name="productSlug" value={product.slug} />
-            <label className="block">
-              <span className="mb-2 block text-sm text-slate-200">Full name</span>
-              <input
-                required
-                name="customerName"
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
-                placeholder="Your name"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-2 block text-sm text-slate-200">Email address</span>
-              <input
-                required
-                type="email"
-                name="customerEmail"
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
-                placeholder="you@example.com"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-2 block text-sm text-slate-200">Mobile number</span>
-              <input
-                required
-                name="customerPhone"
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
-                placeholder="+91 90000 00000"
-              />
-            </label>
-            <label className="block">
-              <span className="mb-2 block text-sm text-slate-200">Card / payment demo</span>
-              <input
-                disabled
-                value="Demo checkout enabled"
-                className="w-full rounded-2xl border border-white/10 bg-slate-900 px-4 py-3 text-slate-400 outline-none"
-                readOnly
-              />
-            </label>
-
-            {query.error ? (
-              <p className="rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-                {query.error}
-              </p>
-            ) : null}
-
-            <button className={`w-full rounded-full px-6 py-3 text-sm font-semibold ${palette.primaryButton}`}>
-              Pay now and unlock download
-            </button>
-          </form>
+          <RazorpayCheckoutForm
+            productSlug={product.slug}
+            productTitle={product.title}
+            price={product.price}
+            paletteButton={palette.primaryButton}
+          />
         </section>
 
         <aside className="space-y-4 rounded-[2rem] border border-white/10 bg-slate-950 p-8">
