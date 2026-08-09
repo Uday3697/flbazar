@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { ProductCard } from "@/components/product-card";
+import HeroTextRotator from "@/components/hero-text-rotator";
+import RandomBg from "@/components/random-bg";
 import { createSupportTicketAction } from "@/lib/actions";
 import { getCategories, getProducts, getSiteSettings } from "@/lib/data-store";
 import { getPalette } from "@/lib/theme";
@@ -23,9 +25,21 @@ export default async function Home({
 
   return (
     <>
+      <RandomBg />
       <Header />
       <main className="relative overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(249,115,22,0.22),transparent_32%),radial-gradient(circle_at_top_right,rgba(236,72,153,0.18),transparent_28%),radial-gradient(circle_at_bottom,rgba(56,189,248,0.16),transparent_38%)]" />
+
+        {/* Hero Banner */}
+        <div className="w-full">
+          <Image
+            src="/hero-banner.png"
+            alt="Flbaazar — Sounds | Loops | Beats | VSTs | Presets"
+            width={1920}
+            height={480}
+            className="w-full object-cover max-h-[340px] md:max-h-[420px]"
+            priority
+          />
+        </div>
 
         <section className="mx-auto grid w-full max-w-7xl gap-10 px-6 py-16 lg:grid-cols-[1.2fr_0.8fr] lg:px-10 lg:py-24">
           <div className="space-y-8">
@@ -33,12 +47,7 @@ export default async function Home({
               {settings.heroBadge}
             </div>
 
-            <div className="space-y-5">
-              <h1 className="max-w-4xl text-5xl font-black uppercase leading-[0.95] tracking-[0.02em] text-white md:text-7xl">
-                {settings.heroHeading}
-              </h1>
-              <p className="max-w-2xl text-lg leading-8 text-slate-300">{settings.heroDescription}</p>
-            </div>
+            <HeroTextRotator />
 
             <div className="flex flex-wrap gap-4">
               <Link

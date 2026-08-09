@@ -8,6 +8,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: settings.siteTitle,
     description: settings.heroDescription,
+    icons: {
+      icon: "/favicon-logo.png",
+      apple: "/favicon-logo.png",
+    },
   };
 }
 

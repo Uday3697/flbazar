@@ -87,9 +87,6 @@ export default async function AdminPage({
                 Login
               </button>
             </form>
-            <p className="mt-4 text-xs text-slate-500">
-              Default local password: <code>Admin@12345</code>. Change it with <code>ADMIN_PASSWORD</code>.
-            </p>
           </section>
         ) : (
           <div className="space-y-6">
