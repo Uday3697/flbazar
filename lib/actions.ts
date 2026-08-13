@@ -14,6 +14,14 @@ import {
 } from "@/lib/data-store";
 import { createAdminSessionToken, isAdminAuthenticated } from "@/lib/security";
 import type { DownloadStatus, OrderStatus, SiteSettings, SupportTicket } from "@/lib/types";
+import { panelPath, type PanelSection } from "@/lib/panel-nav";
+
+function panelRedirect(
+  section: PanelSection,
+  params?: { success?: string; error?: string },
+) {
+  redirect(panelPath(section, params));
+}
 
 export async function loginAdmin(formData: FormData) {
   const password = String(formData.get("password") || "");
@@ -34,7 +42,7 @@ export async function loginAdmin(formData: FormData) {
     secure: process.env.NODE_ENV === "production",
   });
 
-  redirect("/panel?success=Logged%20in");
+  redirect("/panel?success=Logged%20in&section=dashboard");
 }
 
 export async function logoutAdmin() {
@@ -45,7 +53,7 @@ export async function logoutAdmin() {
 
 export async function createCategoryAction(formData: FormData) {
   if (!(await isAdminAuthenticated())) {
-    redirect("/panel?error=Please%20login%20again");
+    panelRedirect("categories", { error: "Please login again" });
   }
 
   const name = String(formData.get("name") || "");
@@ -53,16 +61,16 @@ export async function createCategoryAction(formData: FormData) {
   const description = String(formData.get("description") || "");
 
   if (!name || !description) {
-    redirect("/panel?error=Category%20name%20and%20description%20are%20required");
+    panelRedirect("categories", { error: "Category name and description are required" });
   }
 
   await createCategory({ name, slug, description });
-  redirect("/panel?success=Category%20created");
+  panelRedirect("categories", { success: "Category created" });
 }
 
 export async function createProductAction(formData: FormData) {
   if (!(await isAdminAuthenticated())) {
-    redirect("/panel?error=Please%20login%20again");
+    panelRedirect("products", { error: "Please login again" });
   }
 
   const title = String(formData.get("title") || "");
@@ -89,7 +97,7 @@ export async function createProductAction(formData: FormData) {
     !downloadPassword ||
     !price
   ) {
-    redirect("/panel?error=Please%20fill%20all%20required%20product%20fields");
+    panelRedirect("products", { error: "Please fill all required product fields" });
   }
 
   await createProduct({
@@ -107,12 +115,57 @@ export async function createProductAction(formData: FormData) {
     accent,
   });
 
-  redirect("/panel?success=Product%20published");
+  panelRedirect("products", { success: "Product published" });
+}
+
+export async function updateWebsiteDetailsAction(formData: FormData) {
+  if (!(await isAdminAuthenticated())) {
+    panelRedirect("website", { error: "Please login again" });
+  }
+
+  const updates: Partial<SiteSettings> = {
+    brandName: String(formData.get("brandName") || "").trim(),
+    sellerName: String(formData.get("sellerName") || "").trim(),
+    logoText: String(formData.get("logoText") || "").trim(),
+    siteTitle: String(formData.get("siteTitle") || "").trim(),
+    heroBadge: String(formData.get("heroBadge") || "").trim(),
+    heroHeading: String(formData.get("heroHeading") || "").trim(),
+    heroDescription: String(formData.get("heroDescription") || "").trim(),
+    catalogueHeading: String(formData.get("catalogueHeading") || "").trim(),
+    catalogueDescription: String(formData.get("catalogueDescription") || "").trim(),
+    portfolioHeading: String(formData.get("portfolioHeading") || "").trim(),
+    portfolioDescription: String(formData.get("portfolioDescription") || "").trim(),
+    contactHeading: String(formData.get("contactHeading") || "").trim(),
+    contactDescription: String(formData.get("contactDescription") || "").trim(),
+    footerNote: String(formData.get("footerNote") || "").trim(),
+    supportEmail: String(formData.get("supportEmail") || "").trim(),
+    supportPhone: String(formData.get("supportPhone") || "").trim(),
+    supportWhatsapp: String(formData.get("supportWhatsapp") || "").trim(),
+    supportInstagram: String(formData.get("supportInstagram") || "").trim(),
+    paletteKey: String(formData.get("paletteKey") || "").trim(),
+  };
+
+  await updateSiteSettings(updates);
+  panelRedirect("website", { success: "Website details updated" });
+}
+
+export async function updateGalleryAction(formData: FormData) {
+  if (!(await isAdminAuthenticated())) {
+    panelRedirect("gallery", { error: "Please login again" });
+  }
+
+  const galleryImages = String(formData.get("galleryImages") || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  await updateSiteSettings({ galleryImages });
+  panelRedirect("gallery", { success: "Gallery images updated" });
 }
 
 export async function updateSiteSettingsAction(formData: FormData) {
   if (!(await isAdminAuthenticated())) {
-    redirect("/panel?error=Please%20login%20again");
+    panelRedirect("website", { error: "Please login again" });
   }
 
   const galleryImages = String(formData.get("galleryImages") || "")
@@ -144,7 +197,7 @@ export async function updateSiteSettingsAction(formData: FormData) {
   };
 
   await updateSiteSettings(updates);
-  redirect("/panel?success=Website%20settings%20updated");
+  panelRedirect("website", { success: "Website settings updated" });
 }
 
 export async function createOrderAction(formData: FormData) {
@@ -214,7 +267,7 @@ export async function createSupportTicketAction(formData: FormData) {
 
 export async function updateOrderStatusAction(formData: FormData) {
   if (!(await isAdminAuthenticated())) {
-    redirect("/panel?error=Please%20login%20again");
+    panelRedirect("orders", { error: "Please login again" });
   }
 
   const orderId = String(formData.get("orderId") || "");
@@ -222,28 +275,28 @@ export async function updateOrderStatusAction(formData: FormData) {
   const downloadStatus = String(formData.get("downloadStatus") || "") as DownloadStatus;
 
   if (!orderId) {
-    redirect("/panel?error=Order%20not%20found");
+    panelRedirect("orders", { error: "Order not found" });
   }
 
   await updateOrderStatus(orderId, {
     status,
     downloadStatus,
   });
-  redirect("/panel?success=Order%20updated");
+  panelRedirect("orders", { success: "Order updated" });
 }
 
 export async function updateTicketStatusAction(formData: FormData) {
   if (!(await isAdminAuthenticated())) {
-    redirect("/panel?error=Please%20login%20again");
+    panelRedirect("support", { error: "Please login again" });
   }
 
   const ticketId = String(formData.get("ticketId") || "");
   const status = String(formData.get("status") || "") as SupportTicket["status"];
 
   if (!ticketId) {
-    redirect("/panel?error=Ticket%20not%20found");
+    panelRedirect("support", { error: "Ticket not found" });
   }
 
   await updateTicketStatus(ticketId, status);
-  redirect("/panel?success=Ticket%20updated");
+  panelRedirect("support", { success: "Ticket updated" });
 }

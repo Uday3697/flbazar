@@ -5,11 +5,11 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { ProductCard } from "@/components/product-card";
 import HeroTextRotator from "@/components/hero-text-rotator";
-import RandomBg from "@/components/random-bg";
 import CategoryFilter from "@/components/category-filter";
 import MarqueeTicker from "@/components/marquee-ticker";
 import { createSupportTicketAction } from "@/lib/actions";
 import { getCategories, getProducts, getSiteSettings } from "@/lib/data-store";
+import { siteAlertErrorClass, siteAlertSuccessClass, siteCardClass, siteInputClass } from "@/lib/site-styles";
 import { getPalette } from "@/lib/theme";
 import { formatPrice } from "@/lib/utils";
 
@@ -31,9 +31,8 @@ export default async function Home({
 
   return (
     <>
-      <RandomBg />
       <Header />
-      <main className="relative overflow-hidden">
+      <main className="relative overflow-hidden bg-slate-50">
 
         {/* Hero Banner */}
         <div className="w-full">
@@ -72,22 +71,22 @@ export default async function Home({
 
             <div className="grid gap-4 sm:grid-cols-3">
               <div className={`rounded-[1.75rem] border p-5 ${palette.card}`}>
-                <p className="text-3xl font-black text-white">{products.length}</p>
-                <p className="mt-2 text-sm text-slate-300">Live product listings across your store.</p>
+                <p className="text-3xl font-black text-slate-900">{products.length}</p>
+                <p className="mt-2 text-sm text-slate-600">Live product listings across your store.</p>
               </div>
               <div className={`rounded-[1.75rem] border p-5 ${palette.card}`}>
-                <p className="text-3xl font-black text-white">{categories.length}</p>
-                <p className="mt-2 text-sm text-slate-300">Category shelves for every release format.</p>
+                <p className="text-3xl font-black text-slate-900">{categories.length}</p>
+                <p className="mt-2 text-sm text-slate-600">Category shelves for every release format.</p>
               </div>
               <div className={`rounded-[1.75rem] border p-5 ${palette.card}`}>
-                <p className="text-3xl font-black text-white">24/7</p>
-                <p className="mt-2 text-sm text-slate-300">Support tickets for payment, refund, and download issues.</p>
+                <p className="text-3xl font-black text-slate-900">24/7</p>
+                <p className="mt-2 text-sm text-slate-600">Support tickets for payment, refund, and download issues.</p>
               </div>
             </div>
           </div>
 
           {featuredProduct ? (
-            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-[0_30px_100px_rgba(0,0,0,0.35)] backdrop-blur">
+            <div className={`${siteCardClass} p-6 shadow-md`}>
               <div className={`rounded-[1.75rem] bg-gradient-to-br ${featuredProduct.accent} p-8`}>
                 <p className="text-xs uppercase tracking-[0.35em] text-slate-950/70">Featured release</p>
                 <h2 className="mt-4 text-4xl font-black uppercase leading-none text-slate-950">
@@ -100,7 +99,7 @@ export default async function Home({
                   <p className={`text-sm uppercase tracking-[0.3em] ${palette.accentText}`}>
                     {categoryMap.get(featuredProduct.categorySlug)}
                   </p>
-                  <p className="mt-2 text-3xl font-bold text-white">{formatPrice(featuredProduct.price)}</p>
+                  <p className="mt-2 text-3xl font-bold text-slate-900">{formatPrice(featuredProduct.price)}</p>
                 </div>
                 <Link
                   href={`/products/${featuredProduct.slug}`}
@@ -116,9 +115,9 @@ export default async function Home({
         <section className="mx-auto w-full max-w-7xl px-6 pb-8 lg:px-10">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {categories.map((category) => (
-              <div key={category.id} className="rounded-[1.75rem] border border-white/10 bg-slate-900/70 p-6">
+              <div key={category.id} className={`${siteCardClass} p-6`}>
                 <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>{category.name}</p>
-                <p className="mt-4 text-sm leading-7 text-slate-300">{category.description}</p>
+                <p className="mt-4 text-sm leading-7 text-slate-600">{category.description}</p>
               </div>
             ))}
           </div>
@@ -128,9 +127,9 @@ export default async function Home({
           <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div>
               <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>Catalogue</p>
-              <h2 className="mt-3 text-4xl font-black uppercase text-white">{settings.catalogueHeading}</h2>
+              <h2 className="mt-3 text-4xl font-black uppercase text-slate-900">{settings.catalogueHeading}</h2>
             </div>
-            <p className="max-w-2xl text-sm leading-7 text-slate-300">{settings.catalogueDescription}</p>
+            <p className="max-w-2xl text-sm leading-7 text-slate-600">{settings.catalogueDescription}</p>
           </div>
 
           <Suspense>
@@ -138,7 +137,7 @@ export default async function Home({
           </Suspense>
 
           {filteredProducts.length === 0 ? (
-            <p className="text-slate-400 text-sm mt-4">No products in this category yet.</p>
+            <p className="mt-4 text-sm text-slate-500">No products in this category yet.</p>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
               {filteredProducts.map((product) => (
@@ -157,7 +156,7 @@ export default async function Home({
         <section id="gallery" className="mx-auto w-full max-w-7xl px-6 pb-16 lg:px-10">
           <div className="mb-8">
             <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>Studio Vibes</p>
-            <h2 className="mt-3 text-4xl font-black uppercase text-white">Music Production Gallery</h2>
+            <h2 className="mt-3 text-4xl font-black uppercase text-slate-900">Music Production Gallery</h2>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {[
@@ -168,7 +167,7 @@ export default async function Home({
               { src: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=800&q=80", alt: "DJ setup" },
               { src: "https://images.unsplash.com/photo-1614854262318-831574f15f1f?auto=format&fit=crop&w=800&q=80", alt: "Audio mixer" },
             ].map((img, index) => (
-              <div key={index} className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900 group">
+              <div key={index} className="group overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
                 <Image
                   src={img.src}
                   alt={img.alt}
@@ -182,24 +181,24 @@ export default async function Home({
         </section>
 
         <section id="portfolio" className="mx-auto w-full max-w-7xl px-6 pb-20 lg:px-10">
-          <div className="grid gap-8 rounded-[2rem] border border-white/10 bg-white/5 p-8 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className={`grid gap-8 ${siteCardClass} p-8 lg:grid-cols-[0.9fr_1.1fr]`}>
             <div className="space-y-5">
               <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>Portfolio</p>
-              <h2 className="text-4xl font-black uppercase text-white">{settings.portfolioHeading}</h2>
-              <p className="text-sm leading-7 text-slate-300">{settings.portfolioDescription}</p>
+              <h2 className="text-4xl font-black uppercase text-slate-900">{settings.portfolioHeading}</h2>
+              <p className="text-sm leading-7 text-slate-600">{settings.portfolioDescription}</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-[1.5rem] bg-slate-900 p-5">
-                <p className="text-3xl font-black text-white">120+</p>
-                <p className="mt-2 text-sm text-slate-300">Ideas translated into ready-to-use production assets.</p>
+              <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+                <p className="text-3xl font-black text-slate-900">120+</p>
+                <p className="mt-2 text-sm text-slate-600">Ideas translated into ready-to-use production assets.</p>
               </div>
-              <div className="rounded-[1.5rem] bg-slate-900 p-5">
-                <p className="text-3xl font-black text-white">{categories.length}</p>
-                <p className="mt-2 text-sm text-slate-300">Managed categories and content sections.</p>
+              <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+                <p className="text-3xl font-black text-slate-900">{categories.length}</p>
+                <p className="mt-2 text-sm text-slate-600">Managed categories and content sections.</p>
               </div>
-              <div className="rounded-[1.5rem] bg-slate-900 p-5">
-                <p className="text-3xl font-black text-white">100%</p>
-                <p className="mt-2 text-sm text-slate-300">Encrypted delivery route after successful checkout.</p>
+              <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5">
+                <p className="text-3xl font-black text-slate-900">100%</p>
+                <p className="mt-2 text-sm text-slate-600">Encrypted delivery route after successful checkout.</p>
               </div>
             </div>
           </div>
@@ -207,19 +206,15 @@ export default async function Home({
 
         <section id="support" className="mx-auto w-full max-w-7xl px-6 pb-20 lg:px-10">
           {query.success ? (
-            <p className="mb-6 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-              {query.success}
-            </p>
+            <p className={`mb-6 ${siteAlertSuccessClass}`}>{query.success}</p>
           ) : null}
           {query.error ? (
-            <p className="mb-6 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-              {query.error}
-            </p>
+            <p className={`mb-6 ${siteAlertErrorClass}`}>{query.error}</p>
           ) : null}
           <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-            <div className="rounded-[2rem] border border-white/10 bg-slate-900 p-8">
-              <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>Support</p>
-              <h2 className="mt-3 text-4xl font-black uppercase text-white">{settings.contactHeading}</h2>
+            <div className="rounded-[2rem] border border-slate-800 bg-slate-950 p-8 text-white">
+              <p className="text-xs uppercase tracking-[0.35em] text-orange-300">Support</p>
+              <h2 className="mt-3 text-4xl font-black uppercase">{settings.contactHeading}</h2>
               <p className="mt-4 text-sm leading-7 text-slate-300">{settings.contactDescription}</p>
               <div className="mt-6 space-y-2 text-sm text-slate-300">
                 <p>Email: {settings.supportEmail}</p>
@@ -229,36 +224,16 @@ export default async function Home({
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8">
-              <h3 className="text-2xl font-black uppercase text-white">Payment or download issue form</h3>
+            <div className={`${siteCardClass} p-8`}>
+              <h3 className="text-2xl font-black uppercase text-slate-900">Payment or download issue form</h3>
               <form action={createSupportTicketAction} className="mt-6 grid gap-4 md:grid-cols-2">
                 <input type="hidden" name="orderId" value="" />
                 <input type="hidden" name="productSlug" value="" />
                 <input type="hidden" name="returnPath" value="/" />
-                <input
-                  required
-                  name="customerName"
-                  placeholder="Your name"
-                  className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
-                />
-                <input
-                  required
-                  type="email"
-                  name="customerEmail"
-                  placeholder="Your email"
-                  className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
-                />
-                <input
-                  required
-                  name="customerPhone"
-                  placeholder="Mobile number"
-                  className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
-                />
-                <select
-                  name="issueType"
-                  defaultValue="payment"
-                  className="rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
-                >
+                <input required name="customerName" placeholder="Your name" className={siteInputClass} />
+                <input required type="email" name="customerEmail" placeholder="Your email" className={siteInputClass} />
+                <input required name="customerPhone" placeholder="Mobile number" className={siteInputClass} />
+                <select name="issueType" defaultValue="payment" className={siteInputClass}>
                   <option value="payment">Payment deducted</option>
                   <option value="download">Download failed</option>
                   <option value="refund">Refund request</option>
@@ -270,7 +245,7 @@ export default async function Home({
                   rows={5}
                   name="message"
                   placeholder="Write what happened. Add order ID or payment reference if available."
-                  className="md:col-span-2 rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
+                  className={`md:col-span-2 ${siteInputClass}`}
                 />
                 <div className="md:col-span-2">
                   <button className={`rounded-full px-6 py-3 text-sm font-semibold ${palette.primaryButton}`}>

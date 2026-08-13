@@ -4,6 +4,7 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import RazorpayCheckoutForm from "@/components/checkout/RazorpayCheckoutForm";
 import { getCategories, getProductBySlug, getSiteSettings } from "@/lib/data-store";
+import { siteCardClass } from "@/lib/site-styles";
 import { getPalette } from "@/lib/theme";
 import { formatPrice } from "@/lib/utils";
 
@@ -32,10 +33,10 @@ export default async function CheckoutPage({
     <>
       <Header />
       <main className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-16 lg:grid-cols-[1fr_0.9fr] lg:px-10">
-        <section className="rounded-[2rem] border border-white/10 bg-white/5 p-8">
+        <section className={`${siteCardClass} p-8`}>
           <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>Checkout</p>
-          <h1 className="mt-4 text-4xl font-black uppercase text-white">Complete payment for {product.title}</h1>
-          <p className="mt-4 text-sm leading-7 text-slate-300">
+          <h1 className="mt-4 text-4xl font-black uppercase text-slate-900">Complete payment for {product.title}</h1>
+          <p className="mt-4 text-sm leading-7 text-slate-600">
             Fill in your details and click Pay. A secure Razorpay payment window will open.
           </p>
 
@@ -47,9 +48,9 @@ export default async function CheckoutPage({
           />
         </section>
 
-        <aside className="space-y-4 rounded-[2rem] border border-white/10 bg-slate-950 p-8">
-          <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>{category?.name ?? "Product"}</p>
-          <h2 className="text-3xl font-black text-white">{product.title}</h2>
+        <aside className="space-y-4 rounded-[2rem] border border-slate-800 bg-slate-950 p-8 text-white">
+          <p className="text-xs uppercase tracking-[0.35em] text-orange-300">{category?.name ?? "Product"}</p>
+          <h2 className="text-3xl font-black">{product.title}</h2>
           <p className="text-sm leading-7 text-slate-300">{product.shortDescription}</p>
           <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-5">
             <div className="flex items-center justify-between text-sm text-slate-300">
@@ -72,7 +73,7 @@ export default async function CheckoutPage({
             If payment is deducted but download fails, the buyer can submit a support ticket using phone number and
             order ID. Admin can track the case and mark refunds manually.
           </p>
-          <Link href={`/products/${product.slug}`} className="text-sm text-orange-200 underline underline-offset-4">
+          <Link href={`/products/${product.slug}`} className="text-sm text-orange-300 underline underline-offset-4">
             Back to product page
           </Link>
         </aside>

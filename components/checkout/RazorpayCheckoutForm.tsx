@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createPaymentOrder, verifyPayment } from "@/lib/payment/payment-client";
+import { siteAlertErrorClass, siteInputClass } from "@/lib/site-styles";
 
 declare global {
   interface Window {
@@ -96,44 +97,42 @@ export default function RazorpayCheckoutForm({ productSlug, productTitle, price,
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-4">
       <label className="block">
-        <span className="mb-2 block text-sm text-slate-200">Full name</span>
+        <span className="mb-2 block text-sm text-slate-700">Full name</span>
         <input
           required
           name="name"
           value={customer.name}
           onChange={handleChange}
-          className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
+          className={siteInputClass}
           placeholder="Your name"
         />
       </label>
       <label className="block">
-        <span className="mb-2 block text-sm text-slate-200">Email address</span>
+        <span className="mb-2 block text-sm text-slate-700">Email address</span>
         <input
           required
           type="email"
           name="email"
           value={customer.email}
           onChange={handleChange}
-          className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
+          className={siteInputClass}
           placeholder="you@example.com"
         />
       </label>
       <label className="block">
-        <span className="mb-2 block text-sm text-slate-200">Mobile number</span>
+        <span className="mb-2 block text-sm text-slate-700">Mobile number</span>
         <input
           required
           name="phone"
           value={customer.phone}
           onChange={handleChange}
-          className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
+          className={siteInputClass}
           placeholder="+91 90000 00000"
         />
       </label>
 
       {error ? (
-        <p className="rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-          {error}
-        </p>
+        <p className={siteAlertErrorClass}>{error}</p>
       ) : null}
 
       <button

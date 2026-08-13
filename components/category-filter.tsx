@@ -15,13 +15,13 @@ export default function CategoryFilter({ categories }: { categories: Category[] 
   };
 
   return (
-    <div className="flex flex-wrap gap-3 mb-8">
+    <div className="mb-8 flex flex-wrap gap-3">
       <button
         onClick={() => select("all")}
         className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
           active === "all"
             ? "bg-orange-500 text-white"
-            : "border border-white/15 text-slate-300 hover:border-orange-400 hover:text-white"
+            : "border border-slate-300 text-slate-600 hover:border-orange-400 hover:text-orange-700"
         }`}
       >
         All
@@ -33,7 +33,7 @@ export default function CategoryFilter({ categories }: { categories: Category[] 
           className={`rounded-full px-5 py-2 text-sm font-semibold transition ${
             active === cat.slug
               ? "bg-orange-500 text-white"
-              : "border border-white/15 text-slate-300 hover:border-orange-400 hover:text-white"
+              : "border border-slate-300 text-slate-600 hover:border-orange-400 hover:text-orange-700"
           }`}
         >
           {cat.name}

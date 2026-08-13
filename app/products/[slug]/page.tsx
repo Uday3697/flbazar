@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { getCategories, getProductBySlug, getSiteSettings } from "@/lib/data-store";
+import { siteCardClass } from "@/lib/site-styles";
 import { getPalette } from "@/lib/theme";
 import { extractYouTubeId, formatPrice } from "@/lib/utils";
 
@@ -33,7 +34,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </div>
 
             {youtubeId ? (
-              <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900">
+              <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
                 <iframe
                   className="aspect-video w-full"
                   src={`https://www.youtube.com/embed/${youtubeId}`}
@@ -45,19 +46,19 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             ) : null}
           </section>
 
-          <aside className="space-y-6 rounded-[2rem] border border-white/10 bg-white/5 p-8">
+          <aside className={`space-y-6 ${siteCardClass} p-8`}>
             <div>
               <p className={`text-xs uppercase tracking-[0.35em] ${palette.accentText}`}>{category?.name ?? "Product"}</p>
-              <p className="mt-3 text-4xl font-black text-white">{formatPrice(product.price)}</p>
+              <p className="mt-3 text-4xl font-black text-slate-900">{formatPrice(product.price)}</p>
             </div>
-            <p className="text-sm leading-7 text-slate-300">{product.shortDescription}</p>
+            <p className="text-sm leading-7 text-slate-600">{product.shortDescription}</p>
             <Link
               href={`/checkout/${product.slug}`}
               className={`inline-flex rounded-full px-6 py-3 text-sm font-semibold ${palette.primaryButton}`}
             >
               Buy and unlock download
             </Link>
-            <div className="rounded-[1.5rem] bg-slate-950 p-5 text-sm leading-7 text-slate-300">
+            <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 text-sm leading-7 text-slate-600">
               Download links are hidden until payment succeeds. The secure order page can also reveal zip, rar, or
               video passwords after purchase.
             </div>

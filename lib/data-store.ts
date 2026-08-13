@@ -104,14 +104,14 @@ const seededProducts: Product[] = [
 
 const seededSiteSettings: SiteSettings = {
   id: "site-settings",
-  brandName: "BeatVault",
+  brandName: "Flbaazar",
   sellerName: "Sudip Mandal",
-  logoText: "BV",
-  siteTitle: "BeatVault by Sudip Mandal",
+  logoText: "FL",
+  siteTitle: "Flbaazar.shop by Sudip Mandal",
   heroBadge: "Digital marketplace for producers",
   heroHeading: "Sell sample packs, FLPs, loops, and software from one powerful music storefront.",
   heroDescription:
-    "BeatVault is a clean producer website for Sudip Mandal with encrypted delivery, buyer issue tracking, and a visual homepage the admin can edit anytime.",
+    "Flbaazar.shop is a clean producer website for Sudip Mandal with encrypted delivery, buyer issue tracking, and a visual homepage the admin can edit anytime.",
   catalogueHeading: "Latest products on the homepage",
   catalogueDescription:
     "Every new product created from the admin panel shows here automatically, organized by category and ready for purchase.",
@@ -121,8 +121,9 @@ const seededSiteSettings: SiteSettings = {
   contactHeading: "Need help with payment, refund, or download access?",
   contactDescription:
     "If money was deducted, the file did not download, or access was blocked, the buyer can submit a support ticket with order ID, phone, and issue details.",
-  footerNote: "BeatVault is built for fast digital music delivery with admin-managed branding and homepage content.",
-  supportEmail: "support@beatvault.example",
+  footerNote:
+    "Flbaazar.shop is built for fast digital music delivery with admin-managed branding and homepage content.",
+  supportEmail: "support@flbaazar.shop",
   supportPhone: "+91 90000 12345",
   supportWhatsapp: "+91 90000 12345",
   supportInstagram: "@sudipmandal.music",
@@ -179,6 +180,23 @@ export async function getSiteSettings() {
 
   if (!doc) {
     await collection.insertOne({ ...seededSiteSettings });
+    doc = await collection.findOne({ id: seededSiteSettings.id });
+  }
+
+  if (!doc) {
+    return seededSiteSettings;
+  }
+
+  if (doc.brandName === "BeatVault" || String(doc.siteTitle || "").includes("BeatVault")) {
+    const brandingFix = {
+      brandName: seededSiteSettings.brandName,
+      logoText: seededSiteSettings.logoText,
+      siteTitle: seededSiteSettings.siteTitle,
+      heroDescription: seededSiteSettings.heroDescription,
+      footerNote: seededSiteSettings.footerNote,
+      supportEmail: seededSiteSettings.supportEmail,
+    };
+    await collection.updateOne({ id: seededSiteSettings.id }, { $set: brandingFix });
     doc = await collection.findOne({ id: seededSiteSettings.id });
   }
 

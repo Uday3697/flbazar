@@ -17,7 +17,7 @@ export default function MarqueeTicker() {
   const doubled = [...items, ...items];
 
   return (
-    <div className="overflow-hidden border-y border-orange-500/20 bg-black/40 py-3 my-8">
+    <div className="my-8 overflow-hidden border-y border-orange-200 bg-slate-950 py-3">
       <div
         className="flex gap-12 whitespace-nowrap"
         style={{

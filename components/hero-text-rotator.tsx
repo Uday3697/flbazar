@@ -45,10 +45,10 @@ export default function HeroTextRotator() {
         transform: visible ? "translateY(0)" : "translateY(10px)",
       }}
     >
-      <h1 className="max-w-4xl text-5xl font-black uppercase leading-[0.95] tracking-[0.02em] text-white md:text-7xl drop-shadow-lg">
+      <h1 className="max-w-4xl text-5xl font-black uppercase leading-[0.95] tracking-[0.02em] text-slate-900 md:text-7xl">
         {current.heading}
       </h1>
-      <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-200">{current.sub}</p>
+      <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">{current.sub}</p>
     </div>
   );
 }

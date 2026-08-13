@@ -5,6 +5,7 @@ import { Header } from "@/components/header";
 import { createSupportTicketAction, markDownloadSuccessfulAction } from "@/lib/actions";
 import { getOrderById, getProductBySlug, getSiteSettings } from "@/lib/data-store";
 import { encryptDownloadToken } from "@/lib/security";
+import { siteAlertErrorClass, siteAlertSuccessClass, siteCardClass, siteInputClass } from "@/lib/site-styles";
 import { getPalette } from "@/lib/theme";
 import { formatPrice } from "@/lib/utils";
 
@@ -43,35 +44,27 @@ export default async function OrderPage({
     <>
       <Header />
       <main className="mx-auto w-full max-w-5xl px-6 py-16 lg:px-10">
-        {query.success ? (
-          <p className="mb-6 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-            {query.success}
-          </p>
-        ) : null}
-        {query.error ? (
-          <p className="mb-6 rounded-2xl border border-rose-400/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-            {query.error}
-          </p>
-        ) : null}
+        {query.success ? <p className={`mb-6 ${siteAlertSuccessClass}`}>{query.success}</p> : null}
+        {query.error ? <p className={`mb-6 ${siteAlertErrorClass}`}>{query.error}</p> : null}
 
-        <div className="rounded-[2rem] border border-emerald-300/20 bg-emerald-400/10 p-8">
-          <p className="text-xs uppercase tracking-[0.35em] text-emerald-200">Payment successful</p>
-          <h1 className="mt-4 text-4xl font-black uppercase text-white">Your download is ready</h1>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-200">
+        <div className="rounded-[2rem] border border-emerald-200 bg-emerald-50 p-8">
+          <p className="text-xs uppercase tracking-[0.35em] text-emerald-700">Payment successful</p>
+          <h1 className="mt-4 text-4xl font-black uppercase text-slate-900">Your download is ready</h1>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">
             The public file URL stays hidden. The button below uses an encrypted token that is validated server-side
             before redirecting to the protected download.
           </p>
         </div>
 
-        <div className="mt-8 grid gap-6 rounded-[2rem] border border-white/10 bg-white/5 p-8 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className={`mt-8 grid gap-6 ${siteCardClass} p-8 lg:grid-cols-[1fr_auto] lg:items-center`}>
           <div className="space-y-3">
-            <p className="text-sm text-slate-300">Order ID: {order.id}</p>
-            <p className="text-2xl font-bold text-white">{product.title}</p>
-            <p className="text-sm text-slate-300">
+            <p className="text-sm text-slate-500">Order ID: {order.id}</p>
+            <p className="text-2xl font-bold text-slate-900">{product.title}</p>
+            <p className="text-sm text-slate-600">
               Paid by {order.customerName} for {formatPrice(order.amount)}
             </p>
-            <p className="text-sm text-slate-300">Phone: {order.customerPhone}</p>
-            <p className="text-sm text-slate-300">Payment ref: {order.paymentReference}</p>
+            <p className="text-sm text-slate-600">Phone: {order.customerPhone}</p>
+            <p className="text-sm text-slate-600">Payment ref: {order.paymentReference}</p>
           </div>
           <a
             href={`/api/download?token=${encodeURIComponent(token)}`}
@@ -82,29 +75,33 @@ export default async function OrderPage({
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
-          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8">
-            <h2 className="text-2xl font-black uppercase text-white">Passwords and access</h2>
-            <div className="mt-5 space-y-4 text-sm text-slate-300">
-              <div className="rounded-[1.5rem] bg-slate-950 p-4">
+          <div className={`${siteCardClass} p-8`}>
+            <h2 className="text-2xl font-black uppercase text-slate-900">Passwords and access</h2>
+            <div className="mt-5 space-y-4 text-sm text-slate-600">
+              <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
                 <p className={`text-xs uppercase tracking-[0.3em] ${palette.accentText}`}>Download file password</p>
-                <p className="mt-2 text-lg font-semibold text-white">{product.downloadPassword || "No password required"}</p>
+                <p className="mt-2 text-lg font-semibold text-slate-900">
+                  {product.downloadPassword || "No password required"}
+                </p>
               </div>
-              <div className="rounded-[1.5rem] bg-slate-950 p-4">
+              <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4">
                 <p className={`text-xs uppercase tracking-[0.3em] ${palette.accentText}`}>Demo video password</p>
-                <p className="mt-2 text-lg font-semibold text-white">{product.videoPassword || "No video password set"}</p>
+                <p className="mt-2 text-lg font-semibold text-slate-900">
+                  {product.videoPassword || "No video password set"}
+                </p>
               </div>
             </div>
             <form action={markDownloadSuccessfulAction} className="mt-6">
               <input type="hidden" name="orderId" value={order.id} />
-              <button className="rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-white">
+              <button className="rounded-full border border-slate-300 px-6 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">
                 I downloaded successfully
               </button>
             </form>
           </div>
 
-          <div className="rounded-[2rem] border border-white/10 bg-white/5 p-8">
-            <h2 className="text-2xl font-black uppercase text-white">Report a problem</h2>
-            <p className="mt-3 text-sm leading-7 text-slate-300">
+          <div className={`${siteCardClass} p-8`}>
+            <h2 className="text-2xl font-black uppercase text-slate-900">Report a problem</h2>
+            <p className="mt-3 text-sm leading-7 text-slate-600">
               If payment was successful but the file did not open, access failed, or you need refund help, submit a
               support ticket here.
             </p>
@@ -115,11 +112,7 @@ export default async function OrderPage({
               <input type="hidden" name="customerEmail" value={order.customerEmail} />
               <input type="hidden" name="customerPhone" value={order.customerPhone} />
               <input type="hidden" name="returnPath" value={`/order/${order.id}`} />
-              <select
-                name="issueType"
-                defaultValue="download"
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
-              >
+              <select name="issueType" defaultValue="download" className={siteInputClass}>
                 <option value="download">Download failed</option>
                 <option value="payment">Payment issue</option>
                 <option value="refund">Refund request</option>
@@ -131,7 +124,7 @@ export default async function OrderPage({
                 name="message"
                 rows={5}
                 placeholder="Explain what happened."
-                className="w-full rounded-2xl border border-white/10 bg-slate-950 px-4 py-3 text-white outline-none"
+                className={siteInputClass}
               />
               <button className={`rounded-full px-6 py-3 text-sm font-semibold ${palette.primaryButton}`}>
                 Submit issue
@@ -141,7 +134,7 @@ export default async function OrderPage({
         </div>
 
         <div className="mt-6">
-          <Link href="/" className="text-sm text-orange-200 underline underline-offset-4">
+          <Link href="/" className="text-sm text-orange-600 underline underline-offset-4">
             Return to homepage
           </Link>
         </div>
