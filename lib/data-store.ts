@@ -1,17 +1,8 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { Category, Order, SiteSettings, SupportTicket, Product } from "@/lib/types";
 import { slugify } from "@/lib/utils";
 import { encryptDownloadToken, type DownloadTokenPayload } from "@/lib/security";
 import { getDb } from "@/lib/mongodb";
-
-const DATA_DIR = path.join(process.cwd(), "data");
-const CATEGORY_FILE = path.join(DATA_DIR, "categories.json");
-const PRODUCT_FILE = path.join(DATA_DIR, "products.json");
-const ORDER_FILE = path.join(DATA_DIR, "orders.json");
-const SETTINGS_FILE = path.join(DATA_DIR, "site-settings.json");
-const TICKET_FILE = path.join(DATA_DIR, "support-tickets.json");
 
 const seededCategories: Category[] = [
   {
@@ -143,37 +134,36 @@ const seededSiteSettings: SiteSettings = {
   ],
 };
 
-async function ensureDir() {
-  await mkdir(DATA_DIR, { recursive: true });
-}
+async function seedCollectionIfEmpty<T extends { id: string }>(
+  collectionName: string,
+  seedData: T[],
+): Promise<void> {
+  const db = await getDb();
+  const collection = db.collection(collectionName);
+  const count = await collection.countDocuments();
 
-async function ensureFile<T>(filePath: string, fallback: T) {
-  await ensureDir();
-
-  try {
-    await readFile(filePath, "utf8");
-  } catch {
-    await writeFile(filePath, JSON.stringify(fallback, null, 2));
+  if (count === 0 && seedData.length > 0) {
+    await collection.insertMany(seedData);
   }
 }
 
-async function readCollection<T>(filePath: string, fallback: T): Promise<T> {
-  await ensureFile(filePath, fallback);
-  const content = await readFile(filePath, "utf8");
-  return JSON.parse(content) as T;
-}
-
-async function writeCollection<T>(filePath: string, data: T) {
-  await ensureDir();
-  await writeFile(filePath, JSON.stringify(data, null, 2));
+function stripMongoId<T>(doc: Record<string, unknown>): T {
+  const { _id, ...rest } = doc;
+  return rest as T;
 }
 
 export async function getCategories() {
-  return readCollection(CATEGORY_FILE, seededCategories);
+  await seedCollectionIfEmpty("categories", seededCategories);
+  const db = await getDb();
+  const docs = await db.collection("categories").find({}).toArray();
+  return docs.map((doc) => stripMongoId<Category>(doc));
 }
 
 export async function getProducts() {
-  return readCollection(PRODUCT_FILE, seededProducts);
+  await seedCollectionIfEmpty("products", seededProducts);
+  const db = await getDb();
+  const docs = await db.collection("products").find({}).sort({ createdAt: -1 }).toArray();
+  return docs.map((doc) => stripMongoId<Product>(doc));
 }
 
 export async function getOrders(): Promise<Order[]> {
@@ -183,7 +173,20 @@ export async function getOrders(): Promise<Order[]> {
 }
 
 export async function getSiteSettings() {
-  return readCollection(SETTINGS_FILE, seededSiteSettings);
+  const db = await getDb();
+  const collection = db.collection("site_settings");
+  let doc = await collection.findOne({ id: seededSiteSettings.id });
+
+  if (!doc) {
+    await collection.insertOne({ ...seededSiteSettings });
+    doc = await collection.findOne({ id: seededSiteSettings.id });
+  }
+
+  if (!doc) {
+    return seededSiteSettings;
+  }
+
+  return stripMongoId<SiteSettings>(doc);
 }
 
 export async function getSupportTickets(): Promise<SupportTicket[]> {
@@ -227,8 +230,8 @@ export async function createCategory(input: {
     description: input.description.trim(),
   };
 
-  const nextCategories = [category, ...categories];
-  await writeCollection(CATEGORY_FILE, nextCategories);
+  const db = await getDb();
+  await db.collection("categories").insertOne({ ...category });
   return category;
 }
 
@@ -273,8 +276,8 @@ export async function createProduct(input: {
     createdAt: new Date().toISOString(),
   };
 
-  const nextProducts = [product, ...products];
-  await writeCollection(PRODUCT_FILE, nextProducts);
+  const db = await getDb();
+  await db.collection("products").insertOne({ ...product });
   return product;
 }
 
@@ -383,7 +386,12 @@ export async function updateOrderStatus(
 export async function updateSiteSettings(updates: Partial<SiteSettings>) {
   const current = await getSiteSettings();
   const nextSettings = { ...current, ...updates };
-  await writeCollection(SETTINGS_FILE, nextSettings);
+  const db = await getDb();
+  await db.collection("site_settings").updateOne(
+    { id: nextSettings.id },
+    { $set: nextSettings },
+    { upsert: true },
+  );
   return nextSettings;
 }
 
