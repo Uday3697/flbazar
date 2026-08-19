@@ -36,6 +36,12 @@ export function SignupForm({ primaryButtonClass }: Props) {
     setLoading(true);
     setError(null);
 
+    if (!form.email.trim() && !form.phone.trim()) {
+      setError("Please add email or mobile number.");
+      setLoading(false);
+      return;
+    }
+
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match. Please enter the same password twice.");
       setLoading(false);
@@ -76,6 +82,7 @@ export function SignupForm({ primaryButtonClass }: Props) {
       });
 
       if (signInResult?.error) {
+        setLoading(false);
         router.push("/login?success=Account+created.+Please+login");
         return;
       }
@@ -84,6 +91,7 @@ export function SignupForm({ primaryButtonClass }: Props) {
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed");
+    } finally {
       setLoading(false);
     }
   }

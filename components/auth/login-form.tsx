@@ -12,7 +12,11 @@ type Props = {
 export function LoginForm({ primaryButtonClass }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/account";
+  const callbackParam = searchParams.get("callbackUrl");
+  const callbackUrl =
+    callbackParam && callbackParam.startsWith("/") && !callbackParam.startsWith("//")
+      ? callbackParam
+      : "/account";
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);

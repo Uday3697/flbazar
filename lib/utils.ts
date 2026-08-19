@@ -38,6 +38,10 @@ export function normalizePhone(value: string) {
   return digits;
 }
 
+export function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export function formatOrderDate(value: string) {
   return new Intl.DateTimeFormat("en-IN", {
     dateStyle: "medium",

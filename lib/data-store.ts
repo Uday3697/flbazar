@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { Category, Order, SiteSettings, SupportTicket, Product, User } from "@/lib/types";
-import { slugify, normalizePhone } from "@/lib/utils";
+import { slugify, normalizePhone, escapeRegex } from "@/lib/utils";
 import { encryptDownloadToken, type DownloadTokenPayload } from "@/lib/security";
 import { getDb } from "@/lib/mongodb";
 
@@ -337,7 +337,7 @@ export async function getOrderByEmailOrPhone(email: string, phone: string): Prom
   const db = await getDb();
   const docs = await db.collection("orders").find({
     $or: [
-      { customerEmail: { $regex: new RegExp(`^${email}$`, "i") } },
+      { customerEmail: { $regex: new RegExp(`^${escapeRegex(email)}$`, "i") } },
       { customerPhone: phone },
     ],
   }).sort({ createdAt: -1 }).toArray();
@@ -479,8 +479,9 @@ export async function updateUserPassword(userId: string, passwordHash: string): 
 
 export async function getUserByEmail(email: string): Promise<User | null> {
   const db = await getDb();
+  const trimmed = email.trim();
   const doc = await db.collection("users").findOne({
-    email: { $regex: new RegExp(`^${email.trim()}$`, "i") },
+    email: { $regex: new RegExp(`^${escapeRegex(trimmed)}$`, "i") },
   });
   if (!doc) return null;
   return stripMongoId<User>(doc);
@@ -587,7 +588,7 @@ export async function getOrdersForUser(user: User): Promise<Order[]> {
 
   if (email) {
     (query.$or as Array<Record<string, unknown>>).push({
-      customerEmail: { $regex: new RegExp(`^${email}$`, "i") },
+      customerEmail: { $regex: new RegExp(`^${escapeRegex(email)}$`, "i") },
     });
   }
   if (phone) {
