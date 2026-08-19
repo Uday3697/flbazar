@@ -9,11 +9,27 @@ export async function POST(request: NextRequest) {
     const email = String(body.email || "").trim();
     const phone = String(body.phone || "").trim();
     const password = String(body.password || "");
+    const confirmPassword = String(body.confirmPassword || "");
+    const agreeToTerms = Boolean(body.agreeToTerms);
     const ageRaw = Number(body.age);
 
     if (!name || !password || password.length < 6) {
       return NextResponse.json(
         { error: "Name and password (min 6 characters) are required" },
+        { status: 400 },
+      );
+    }
+
+    if (password !== confirmPassword) {
+      return NextResponse.json(
+        { error: "Passwords do not match" },
+        { status: 400 },
+      );
+    }
+
+    if (!agreeToTerms) {
+      return NextResponse.json(
+        { error: "You must agree to the terms and conditions" },
         { status: 400 },
       );
     }

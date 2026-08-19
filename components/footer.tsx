@@ -62,11 +62,7 @@ export async function Footer() {
           className="mx-auto flex flex-col items-center justify-center gap-2 text-xs text-slate-500"
         >
           <Script
-            src="https://www.freevisitorcounters.com/auth.php?id=6fa9262511f02956cdbfd508894aa9a72c117d9d"
-            strategy="lazyOnload"
-          />
-          <Script
-            src="https://www.freevisitorcounters.com/en/home/counter/1622673/t/10"
+            src="https://free-hit-counters.net/count/k3vx"
             strategy="lazyOnload"
           />
           <a
@@ -75,8 +71,12 @@ export async function Footer() {
             rel="noopener noreferrer"
             className="text-[10px] text-slate-600 transition hover:text-slate-400"
           >
-            free-hit-counters.net
+            flbaazar.shop
           </a>
+          <Script
+            src="https://www.whomania.com/ctr?id=3844d01bc6933b6b64d96fc8bfe1f6d1e96b513c"
+            strategy="lazyOnload"
+          />
         </div>
       </div>
     </footer>
