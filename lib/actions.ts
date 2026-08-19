@@ -364,6 +364,7 @@ export async function createCustomerAccountAction(formData: FormData) {
   }
 
   const name = String(formData.get("name") || "").trim();
+  const age = Number(formData.get("age") || 0);
   const email = String(formData.get("email") || "").trim();
   const phone = String(formData.get("phone") || "").trim();
   const password = String(formData.get("password") || "");
@@ -379,6 +380,7 @@ export async function createCustomerAccountAction(formData: FormData) {
   try {
     await createUser({
       name,
+      age: age >= 13 && age <= 100 ? age : undefined,
       email: email || undefined,
       phone: phone || undefined,
       passwordHash: hashPassword(password),

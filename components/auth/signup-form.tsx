@@ -12,7 +12,7 @@ type Props = {
 
 export function SignupForm({ primaryButtonClass }: Props) {
   const router = useRouter();
-  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
+  const [form, setForm] = useState({ name: "", age: "", email: "", phone: "", password: "" });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -66,6 +66,17 @@ export function SignupForm({ primaryButtonClass }: Props) {
         value={form.name}
         onChange={handleChange}
         placeholder="Full name"
+        className={siteInputClass}
+      />
+      <input
+        required
+        type="number"
+        name="age"
+        min={13}
+        max={100}
+        value={form.age}
+        onChange={handleChange}
+        placeholder="Age"
         className={siteInputClass}
       />
       <input

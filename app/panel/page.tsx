@@ -73,6 +73,7 @@ export default async function AdminPage({
   const customers = users.map((user) => ({
     id: user.id,
     name: user.name,
+    age: user.age,
     email: user.email,
     phone: user.phone,
     createdAt: user.createdAt,

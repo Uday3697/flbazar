@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { getSiteSettings } from "@/lib/data-store";
+import { getSiteSettings, getUserById } from "@/lib/data-store";
 import { auth } from "@/lib/auth";
 import { logoutUserAction } from "@/lib/actions";
 
@@ -14,6 +14,8 @@ const navItems = [
 
 export async function Header() {
   const [settings, session] = await Promise.all([getSiteSettings(), auth()]);
+  const user = session?.user?.id ? await getUserById(session.user.id) : null;
+  const displayName = user?.name || session?.user?.name || "Account";
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950 shadow-md">
@@ -44,11 +46,14 @@ export async function Header() {
           ))}
           {session?.user ? (
             <>
+              <span className="hidden rounded-full border border-orange-400/25 bg-orange-500/10 px-3 py-2 text-orange-200 sm:inline">
+                Hi, {displayName.split(" ")[0]}
+              </span>
               <Link
                 href="/account"
                 className="rounded-full border border-orange-400/40 px-4 py-2 transition hover:bg-orange-500/10"
               >
-                My purchases
+                My profile
               </Link>
               <form action={logoutUserAction}>
                 <button

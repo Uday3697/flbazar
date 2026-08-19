@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
     const email = String(body.email || "").trim();
     const phone = String(body.phone || "").trim();
     const password = String(body.password || "");
+    const ageRaw = Number(body.age);
 
     if (!name || !password || password.length < 6) {
       return NextResponse.json(
@@ -24,8 +25,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!ageRaw || ageRaw < 13 || ageRaw > 100) {
+      return NextResponse.json(
+        { error: "Please enter a valid age (13–100)" },
+        { status: 400 },
+      );
+    }
+
     const user = await createUser({
       name,
+      age: ageRaw,
       email: email || undefined,
       phone: phone || undefined,
       passwordHash: hashPassword(password),

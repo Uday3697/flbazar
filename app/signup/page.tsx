@@ -20,7 +20,7 @@ export default async function SignupPage() {
           <p className="text-xs uppercase tracking-[0.35em] text-orange-600">Account</p>
           <h1 className="mt-3 text-3xl font-black uppercase text-slate-900">Sign up</h1>
           <p className="mt-3 text-sm text-slate-600">
-            Create an account with mobile or email, then login to track your purchases.
+            Create an account with name, age, mobile or email, then login to track purchases.
           </p>
           <div className="mt-6">
             <SignupForm primaryButtonClass={palette.primaryButton} />

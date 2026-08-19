@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import RazorpayCheckoutForm from "@/components/checkout/RazorpayCheckoutForm";
-import { getCategories, getProductBySlug, getSiteSettings } from "@/lib/data-store";
+import { auth } from "@/lib/auth";
+import { getCategories, getProductBySlug, getSiteSettings, getUserById } from "@/lib/data-store";
 import { siteCardClass } from "@/lib/site-styles";
 import { getPalette } from "@/lib/theme";
 import { formatPrice } from "@/lib/utils";
@@ -16,10 +17,11 @@ export default async function CheckoutPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [product, categories, settings] = await Promise.all([
+  const [product, categories, settings, session] = await Promise.all([
     getProductBySlug(slug),
     getCategories(),
     getSiteSettings(),
+    auth(),
   ]);
 
   if (!product) {
@@ -28,6 +30,21 @@ export default async function CheckoutPage({
 
   const category = categories.find((item) => item.slug === product.categorySlug);
   const palette = getPalette(settings.paletteKey);
+
+  let initialCustomer: { name: string; email: string; phone: string } | undefined;
+  let isLoggedIn = false;
+
+  if (session?.user?.id) {
+    const user = await getUserById(session.user.id);
+    if (user) {
+      isLoggedIn = true;
+      initialCustomer = {
+        name: user.name,
+        email: user.email || "",
+        phone: user.phone || "",
+      };
+    }
+  }
 
   return (
     <>
@@ -45,6 +62,8 @@ export default async function CheckoutPage({
             productTitle={product.title}
             price={product.price}
             paletteButton={palette.primaryButton}
+            initialCustomer={initialCustomer}
+            isLoggedIn={isLoggedIn}
           />
         </section>
 

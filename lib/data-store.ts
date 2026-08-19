@@ -511,6 +511,7 @@ export async function getUserByGoogleId(googleId: string): Promise<User | null> 
 
 export async function createUser(input: {
   name: string;
+  age?: number;
   email?: string;
   phone?: string;
   passwordHash?: string;
@@ -519,6 +520,8 @@ export async function createUser(input: {
 }): Promise<User> {
   const email = input.email?.trim().toLowerCase();
   const phone = input.phone ? normalizePhone(input.phone) : undefined;
+  const age =
+    typeof input.age === "number" && input.age > 0 && input.age < 120 ? Math.floor(input.age) : undefined;
 
   if (email && await getUserByEmail(email)) {
     throw new Error("Email already registered");
@@ -530,6 +533,7 @@ export async function createUser(input: {
   const user: User = {
     id: randomUUID(),
     name: input.name.trim(),
+    age,
     email: email || undefined,
     phone: phone || undefined,
     passwordHash: input.passwordHash,

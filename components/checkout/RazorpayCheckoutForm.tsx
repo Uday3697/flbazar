@@ -11,18 +11,35 @@ declare global {
   }
 }
 
+type CustomerDetails = {
+  name: string;
+  email: string;
+  phone: string;
+};
+
 type Props = {
   productSlug: string;
   productTitle: string;
   price: number;
   paletteButton: string;
+  initialCustomer?: CustomerDetails;
+  isLoggedIn?: boolean;
 };
 
-export default function RazorpayCheckoutForm({ productSlug, productTitle, price, paletteButton }: Props) {
+export default function RazorpayCheckoutForm({
+  productSlug,
+  productTitle,
+  price,
+  paletteButton,
+  initialCustomer,
+  isLoggedIn = false,
+}: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [customer, setCustomer] = useState({ name: "", email: "", phone: "" });
+  const [customer, setCustomer] = useState<CustomerDetails>(
+    initialCustomer ?? { name: "", email: "", phone: "" },
+  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCustomer((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -96,6 +113,12 @@ export default function RazorpayCheckoutForm({ productSlug, productTitle, price,
 
   return (
     <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+      {isLoggedIn ? (
+        <p className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          Logged in — your profile details are filled below. You can edit before paying.
+        </p>
+      ) : null}
+
       <label className="block">
         <span className="mb-2 block text-sm text-slate-700">Full name</span>
         <input
@@ -127,7 +150,7 @@ export default function RazorpayCheckoutForm({ productSlug, productTitle, price,
           value={customer.phone}
           onChange={handleChange}
           className={siteInputClass}
-          placeholder="+91 90000 00000"
+          placeholder="8210075160"
         />
       </label>
 

@@ -43,6 +43,7 @@ const accents = [
 type CustomerProfile = {
   id: string;
   name: string;
+  age?: number;
   email?: string;
   phone?: string;
   createdAt: string;
@@ -389,6 +390,7 @@ export function AdminDashboard({
               />
               <form action={createCustomerAccountAction} className="space-y-4">
                 <input required name="name" placeholder="Customer full name" className={dashboardInputClass} />
+                <input type="number" name="age" min={13} max={100} placeholder="Age (optional)" className={dashboardInputClass} />
                 <input type="email" name="email" placeholder="Email (optional)" className={dashboardInputClass} />
                 <input name="phone" placeholder="Mobile number (optional)" className={dashboardInputClass} />
                 <input
@@ -418,6 +420,7 @@ export function AdminDashboard({
                       <p className="font-semibold text-slate-900">{customer.name}</p>
                       <p className="mt-1 text-sm text-slate-600">
                         {customer.email || "No email"} · {customer.phone || "No mobile"}
+                        {customer.age ? ` · Age ${customer.age}` : ""}
                       </p>
                       <p className="mt-1 text-xs text-slate-500">
                         Joined {formatOrderDate(customer.createdAt)}

@@ -27,6 +27,7 @@ export type Product = {
 export type User = {
   id: string;
   name: string;
+  age?: number;
   email?: string;
   phone?: string;
   passwordHash?: string;
