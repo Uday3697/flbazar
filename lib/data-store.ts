@@ -477,23 +477,6 @@ export async function updateUserPassword(userId: string, passwordHash: string): 
   return result.matchedCount === 1;
 }
 
-export async function resetUserPasswordByLogin(
-  login: string,
-  passwordHash: string,
-): Promise<{ ok: boolean; error?: string }> {
-  const user = await getUserByEmailOrPhone(login);
-  if (!user) {
-    return { ok: false, error: "No account found with this email or mobile" };
-  }
-
-  const updated = await updateUserPassword(user.id, passwordHash);
-  if (!updated) {
-    return { ok: false, error: "Could not update password" };
-  }
-
-  return { ok: true };
-}
-
 export async function getUserByEmail(email: string): Promise<User | null> {
   const db = await getDb();
   const doc = await db.collection("users").findOne({

@@ -3,7 +3,13 @@ import Credentials from "next-auth/providers/credentials";
 import { getUserByEmailOrPhone } from "@/lib/data-store";
 import { verifyPassword } from "@/lib/security";
 
+const authSecret =
+  process.env.AUTH_SECRET ||
+  process.env.SITE_SECRET ||
+  (process.env.NODE_ENV === "development" ? "dev-only-auth-secret" : undefined);
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  secret: authSecret,
   providers: [
     Credentials({
       name: "Email or mobile",

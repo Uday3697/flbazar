@@ -12,7 +12,6 @@ import {
   deleteCategoryById,
   deleteProductById,
   getProductBySlug,
-  resetUserPasswordByLogin,
   updateOrderStatus,
   updateSiteSettings,
   updateTicketStatus,
@@ -409,25 +408,4 @@ export async function adminResetCustomerPasswordAction(formData: FormData) {
   }
 
   panelRedirect("customers", { success: "Password updated for customer" });
-}
-
-export async function forgotPasswordAction(formData: FormData) {
-  const login = String(formData.get("login") || "").trim();
-  const password = String(formData.get("password") || "");
-  const confirmPassword = String(formData.get("confirmPassword") || "");
-
-  if (!login || !password || password.length < 6) {
-    redirect("/forgot-password?error=Enter+email/mobile+and+password+(min+6+chars)");
-  }
-
-  if (password !== confirmPassword) {
-    redirect("/forgot-password?error=Passwords+do+not+match");
-  }
-
-  const result = await resetUserPasswordByLogin(login, hashPassword(password));
-  if (!result.ok) {
-    redirect(`/forgot-password?error=${encodeURIComponent(result.error || "Reset failed")}`);
-  }
-
-  redirect("/login?success=Password+reset.+You+can+login+now");
 }
