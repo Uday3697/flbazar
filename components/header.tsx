@@ -45,12 +45,18 @@ export async function Header() {
             className="h-11 w-11 shrink-0 rounded-full object-cover"
           />
           <div className="min-w-0">
-            <p className="text-sm uppercase tracking-[0.35em] text-orange-300">{settings.brandName}</p>
+            <p className="text-sm uppercase tracking-[0.35em] text-orange-300">
+              {settings.brandName}
+            </p>
             <p className="text-xs text-slate-300">{settings.sellerName}</p>
-            <p className="mt-1.5 flex flex-wrap items-center gap-x-1.5 gap-y-1">
+            <p className="-mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1">
               {seoTags.map((tag, index) => (
                 <span key={tag.label} className="flex items-center gap-1.5">
-                  {index > 0 ? <span className="text-slate-600" aria-hidden="true">·</span> : null}
+                  {index > 0 ?
+                    <span className="text-slate-600" aria-hidden="true">
+                      ·
+                    </span>
+                  : null}
                   <Link
                     href={tag.href}
                     className="text-[10px] uppercase tracking-[0.12em] text-slate-500 transition hover:text-orange-300"
@@ -73,7 +79,7 @@ export async function Header() {
               {item.label}
             </Link>
           ))}
-          {session?.user ? (
+          {session?.user ?
             <>
               <Link
                 href="/account"
@@ -99,8 +105,7 @@ export async function Header() {
                 </button>
               </form>
             </>
-          ) : (
-            <>
+          : <>
               <Link
                 href="/login"
                 className="rounded-full border border-white/10 px-4 py-2 transition hover:border-orange-300/60 hover:bg-white/5"
@@ -114,7 +119,7 @@ export async function Header() {
                 Sign up
               </Link>
             </>
-          )}
+          }
         </nav>
       </div>
     </header>
