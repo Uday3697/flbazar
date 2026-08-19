@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
@@ -7,13 +8,21 @@ import { ProductCard } from "@/components/product-card";
 import HeroTextRotator from "@/components/hero-text-rotator";
 import CategoryFilter from "@/components/category-filter";
 import MarqueeTicker from "@/components/marquee-ticker";
+import { JsonLd } from "@/components/seo/json-ld";
+import { HomeSeoSection } from "@/components/seo/home-seo-section";
 import { createSupportTicketAction } from "@/lib/actions";
 import { getCategories, getProducts, getSiteSettings } from "@/lib/data-store";
+import { buildHomeJsonLd, buildHomeMetadata } from "@/lib/seo";
 import { siteAlertErrorClass, siteAlertSuccessClass, siteCardClass, siteInputClass } from "@/lib/site-styles";
 import { getPalette } from "@/lib/theme";
 import { formatPrice } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  return buildHomeMetadata(settings);
+}
 
 export default async function Home({
   searchParams,
@@ -28,9 +37,11 @@ export default async function Home({
     : products;
   const featuredProduct = products[0];
   const palette = getPalette(settings.paletteKey);
+  const jsonLd = buildHomeJsonLd(settings, products, categories);
 
   return (
     <>
+      <JsonLd data={jsonLd} />
       <Header />
       <main className="relative overflow-hidden bg-slate-50">
 
@@ -203,6 +214,12 @@ export default async function Home({
             </div>
           </div>
         </section>
+
+        <HomeSeoSection
+          settings={settings}
+          categories={categories}
+          accentTextClass={palette.accentText}
+        />
 
         <section id="support" className="mx-auto w-full max-w-7xl px-6 pb-20 lg:px-10">
           {query.success ? (

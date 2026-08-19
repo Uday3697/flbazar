@@ -154,10 +154,12 @@ export function SignupForm({ primaryButtonClass }: Props) {
         className={siteInputClass}
       />
 
-      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-6 text-slate-600">
-        <p className="font-semibold text-slate-900">Terms &amp; conditions</p>
-        <p className="mt-2">{TERMS_TEXT}</p>
-      </div>
+      <details className="rounded-2xl border border-slate-200 bg-slate-50 text-sm">
+        <summary className="cursor-pointer px-4 py-3 font-semibold text-orange-600 underline-offset-2 hover:underline [&::-webkit-details-marker]:hidden">
+          Terms &amp; conditions
+        </summary>
+        <p className="border-t border-slate-200 px-4 py-3 text-xs leading-6 text-slate-600">{TERMS_TEXT}</p>
+      </details>
 
       <label className="flex items-start gap-3 text-sm text-slate-700">
         <input
@@ -167,7 +169,7 @@ export function SignupForm({ primaryButtonClass }: Props) {
           onChange={(e) => setAgreeTerms(e.target.checked)}
           className="mt-1 h-4 w-4 rounded border-slate-300"
         />
-        <span>I agree to the terms and conditions. I will not resell products — personal use only.</span>
+        <span>I agree to the terms and conditions.</span>
       </label>
 
       <p className="text-xs text-slate-500">

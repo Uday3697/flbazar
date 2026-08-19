@@ -2,14 +2,13 @@ import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/data-store";
 import MouseCursor from "@/components/mouse-cursor";
 import { AuthSessionProvider } from "@/components/auth/session-provider";
+import { buildRootMetadata } from "@/lib/seo";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSiteSettings();
-
   return {
-    title: settings.siteTitle,
-    description: settings.heroDescription,
+    ...buildRootMetadata(settings),
     icons: {
       icon: "/favicon-logo.png",
       apple: "/favicon-logo.png",
