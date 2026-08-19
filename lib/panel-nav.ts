@@ -4,6 +4,7 @@ export const panelSections = [
   { id: "gallery", label: "Gallery images" },
   { id: "categories", label: "Categories" },
   { id: "products", label: "Products" },
+  { id: "customers", label: "Customers" },
   { id: "orders", label: "Orders" },
   { id: "support", label: "Support tickets" },
 ] as const;

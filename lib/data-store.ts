@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import type { Category, Order, SiteSettings, SupportTicket, Product } from "@/lib/types";
-import { slugify } from "@/lib/utils";
+import type { Category, Order, SiteSettings, SupportTicket, Product, User } from "@/lib/types";
+import { slugify, normalizePhone } from "@/lib/utils";
 import { encryptDownloadToken, type DownloadTokenPayload } from "@/lib/security";
 import { getDb } from "@/lib/mongodb";
 
@@ -263,6 +263,7 @@ export async function createProduct(input: {
   description: string;
   youtubeUrl: string;
   downloadUrl: string;
+  downloadUrls?: string[];
   downloadPassword: string;
   videoPassword: string;
   accent: string;
@@ -277,6 +278,9 @@ export async function createProduct(input: {
     suffix += 1;
   }
 
+  const downloadUrls = input.downloadUrls?.map((url) => url.trim()).filter(Boolean) ?? [];
+  const primaryDownload = downloadUrls[0] || input.downloadUrl.trim();
+
   const product: Product = {
     id: randomUUID(),
     title: input.title.trim(),
@@ -287,7 +291,8 @@ export async function createProduct(input: {
     shortDescription: input.shortDescription.trim(),
     description: input.description.trim(),
     youtubeUrl: input.youtubeUrl.trim(),
-    downloadUrl: input.downloadUrl.trim(),
+    downloadUrl: primaryDownload,
+    downloadUrls: downloadUrls.length > 0 ? downloadUrls : undefined,
     downloadPassword: input.downloadPassword.trim(),
     videoPassword: input.videoPassword.trim(),
     accent: input.accent.trim() || "from-fuchsia-500 via-orange-400 to-amber-300",
@@ -301,6 +306,7 @@ export async function createProduct(input: {
 
 export async function createOrderWithItems(input: {
   items: Array<{ productSlug: string; title: string; price: number }>;
+  userId?: string;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
@@ -310,6 +316,7 @@ export async function createOrderWithItems(input: {
   const order: Order = {
     id: randomUUID(),
     items: input.items,
+    userId: input.userId,
     customerName: input.customerName.trim(),
     customerEmail: input.customerEmail.trim(),
     customerPhone: input.customerPhone.trim(),
@@ -340,6 +347,7 @@ export async function getOrderByEmailOrPhone(email: string, phone: string): Prom
 export async function getOrderItemDownloadToken(
   orderId: string,
   productSlug: string,
+  partIndex = 0,
 ): Promise<string> {
   const order = await getOrderById(orderId);
 
@@ -358,6 +366,7 @@ export async function getOrderItemDownloadToken(
     orderId,
     productSlug,
     expiresAt,
+    partIndex,
   };
 
   return encryptDownloadToken(payload);
@@ -447,4 +456,186 @@ export async function updateTicketStatus(id: string, status: SupportTicket["stat
   if (!doc) return null;
   const { _id, ...rest } = doc;
   return rest as SupportTicket;
+}
+
+export async function getUserById(id: string): Promise<User | null> {
+  const db = await getDb();
+  const doc = await db.collection("users").findOne({ id });
+  if (!doc) return null;
+  return stripMongoId<User>(doc);
+}
+
+export async function getUsers(): Promise<User[]> {
+  const db = await getDb();
+  const docs = await db.collection("users").find({}).sort({ createdAt: -1 }).toArray();
+  return docs.map((doc) => stripMongoId<User>(doc));
+}
+
+export async function updateUserPassword(userId: string, passwordHash: string): Promise<boolean> {
+  const db = await getDb();
+  const result = await db.collection("users").updateOne({ id: userId }, { $set: { passwordHash } });
+  return result.matchedCount === 1;
+}
+
+export async function resetUserPasswordByLogin(
+  login: string,
+  passwordHash: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const user = await getUserByEmailOrPhone(login);
+  if (!user) {
+    return { ok: false, error: "No account found with this email or mobile" };
+  }
+
+  const updated = await updateUserPassword(user.id, passwordHash);
+  if (!updated) {
+    return { ok: false, error: "Could not update password" };
+  }
+
+  return { ok: true };
+}
+
+export async function getUserByEmail(email: string): Promise<User | null> {
+  const db = await getDb();
+  const doc = await db.collection("users").findOne({
+    email: { $regex: new RegExp(`^${email.trim()}$`, "i") },
+  });
+  if (!doc) return null;
+  return stripMongoId<User>(doc);
+}
+
+export async function getUserByPhone(phone: string): Promise<User | null> {
+  const normalized = normalizePhone(phone);
+  const db = await getDb();
+  const doc = await db.collection("users").findOne({ phone: normalized });
+  if (!doc) return null;
+  return stripMongoId<User>(doc);
+}
+
+export async function getUserByEmailOrPhone(login: string): Promise<User | null> {
+  const trimmed = login.trim();
+  if (trimmed.includes("@")) {
+    return getUserByEmail(trimmed);
+  }
+  return getUserByPhone(trimmed);
+}
+
+export async function getUserByGoogleId(googleId: string): Promise<User | null> {
+  const db = await getDb();
+  const doc = await db.collection("users").findOne({ googleId });
+  if (!doc) return null;
+  return stripMongoId<User>(doc);
+}
+
+export async function createUser(input: {
+  name: string;
+  email?: string;
+  phone?: string;
+  passwordHash?: string;
+  googleId?: string;
+  image?: string;
+}): Promise<User> {
+  const email = input.email?.trim().toLowerCase();
+  const phone = input.phone ? normalizePhone(input.phone) : undefined;
+
+  if (email && await getUserByEmail(email)) {
+    throw new Error("Email already registered");
+  }
+  if (phone && await getUserByPhone(phone)) {
+    throw new Error("Mobile number already registered");
+  }
+
+  const user: User = {
+    id: randomUUID(),
+    name: input.name.trim(),
+    email: email || undefined,
+    phone: phone || undefined,
+    passwordHash: input.passwordHash,
+    googleId: input.googleId,
+    image: input.image,
+    createdAt: new Date().toISOString(),
+  };
+
+  const db = await getDb();
+  await db.collection("users").insertOne({ ...user });
+  return user;
+}
+
+export async function upsertGoogleUser(input: {
+  googleId: string;
+  email: string;
+  name: string;
+  image?: string;
+}): Promise<User> {
+  const existingByGoogle = await getUserByGoogleId(input.googleId);
+  if (existingByGoogle) {
+    return existingByGoogle;
+  }
+
+  const existingByEmail = await getUserByEmail(input.email);
+  if (existingByEmail) {
+    const db = await getDb();
+    await db.collection("users").updateOne(
+      { id: existingByEmail.id },
+      { $set: { googleId: input.googleId, image: input.image || existingByEmail.image } },
+    );
+    return { ...existingByEmail, googleId: input.googleId, image: input.image || existingByEmail.image };
+  }
+
+  return createUser({
+    name: input.name,
+    email: input.email,
+    googleId: input.googleId,
+    image: input.image,
+  });
+}
+
+export async function getOrdersForUser(user: User): Promise<Order[]> {
+  const db = await getDb();
+  const phone = user.phone ? normalizePhone(user.phone) : "";
+  const email = user.email?.trim();
+
+  const query: Record<string, unknown> = {
+    $or: [{ userId: user.id }],
+  };
+
+  if (email) {
+    (query.$or as Array<Record<string, unknown>>).push({
+      customerEmail: { $regex: new RegExp(`^${email}$`, "i") },
+    });
+  }
+  if (phone) {
+    (query.$or as Array<Record<string, unknown>>).push({ customerPhone: phone });
+  }
+
+  const docs = await db.collection("orders").find(query).sort({ createdAt: -1 }).toArray();
+  return docs.map(({ _id, ...rest }) => rest as Order);
+}
+
+export async function getTotalEarnings(): Promise<number> {
+  const orders = await getOrders();
+  return orders
+    .filter((order) => order.status === "paid")
+    .reduce((sum, order) => sum + order.amount, 0);
+}
+
+export async function deleteProductById(id: string): Promise<boolean> {
+  const db = await getDb();
+  const result = await db.collection("products").deleteOne({ id });
+  return result.deletedCount === 1;
+}
+
+export async function deleteCategoryById(id: string): Promise<{ ok: boolean; error?: string }> {
+  const db = await getDb();
+  const category = await db.collection("categories").findOne({ id });
+  if (!category) {
+    return { ok: false, error: "Category not found" };
+  }
+
+  const productCount = await db.collection("products").countDocuments({ categorySlug: category.slug });
+  if (productCount > 0) {
+    return { ok: false, error: "Remove or reassign products in this category first" };
+  }
+
+  await db.collection("categories").deleteOne({ id });
+  return { ok: true };
 }

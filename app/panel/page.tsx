@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { AdminDashboard } from "@/components/panel/admin-dashboard";
 import { loginAdmin } from "@/lib/actions";
-import { getCategories, getOrders, getProducts, getSiteSettings, getSupportTickets } from "@/lib/data-store";
+import { getCategories, getOrders, getProducts, getSiteSettings, getSupportTickets, getUsers } from "@/lib/data-store";
 import { isPanelSection, type PanelSection } from "@/lib/panel-nav";
 import { isAdminAuthenticated } from "@/lib/security";
 import { dashboardBtnPrimaryClass, panelLoginInputClass } from "@/components/panel/panel-styles";
@@ -61,13 +61,22 @@ export default async function AdminPage({
     );
   }
 
-  const [categories, products, settings, orders, tickets] = await Promise.all([
+  const [categories, products, settings, orders, tickets, users] = await Promise.all([
     getCategories(),
     getProducts(),
     getSiteSettings(),
     getOrders(),
     getSupportTickets(),
+    getUsers(),
   ]);
+
+  const customers = users.map((user) => ({
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    phone: user.phone,
+    createdAt: user.createdAt,
+  }));
 
   return (
     <Suspense
@@ -87,6 +96,7 @@ export default async function AdminPage({
           settings={settings}
           orders={orders}
           tickets={tickets}
+          customers={customers}
         />
       </Suspense>
   );

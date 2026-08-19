@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { initializeRazorpay, generateOrderDescription } from "@/lib/payment/razorpay";
 import { createOrderWithItems } from "@/lib/data-store";
+import { auth } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
   try {
@@ -52,8 +53,10 @@ export async function POST(request: NextRequest) {
     } as any);
 
     // Create local order record
+    const session = await auth();
     const order = await createOrderWithItems({
       items,
+      userId: session?.user?.id,
       customerName,
       customerEmail,
       customerPhone,

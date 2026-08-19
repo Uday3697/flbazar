@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { getSiteSettings } from "@/lib/data-store";
+import { auth } from "@/lib/auth";
+import { logoutUserAction } from "@/lib/actions";
 
 const navItems = [
   { href: "/", label: "Home" },
@@ -11,7 +13,7 @@ const navItems = [
 ];
 
 export async function Header() {
-  const settings = await getSiteSettings();
+  const [settings, session] = await Promise.all([getSiteSettings(), auth()]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950 shadow-md">
@@ -40,6 +42,39 @@ export async function Header() {
               {item.label}
             </Link>
           ))}
+          {session?.user ? (
+            <>
+              <Link
+                href="/account"
+                className="rounded-full border border-orange-400/40 px-4 py-2 transition hover:bg-orange-500/10"
+              >
+                My purchases
+              </Link>
+              <form action={logoutUserAction}>
+                <button
+                  type="submit"
+                  className="rounded-full border border-white/10 px-4 py-2 transition hover:border-orange-300/60 hover:bg-white/5"
+                >
+                  Logout
+                </button>
+              </form>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="rounded-full border border-white/10 px-4 py-2 transition hover:border-orange-300/60 hover:bg-white/5"
+              >
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                className="rounded-full border border-orange-400/40 bg-orange-500/10 px-4 py-2 transition hover:bg-orange-500/20"
+              >
+                Sign up
+              </Link>
+            </>
+          )}
         </nav>
       </div>
     </header>

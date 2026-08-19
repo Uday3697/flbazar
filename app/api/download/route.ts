@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getOrderById, getProductBySlug } from "@/lib/data-store";
+import { getProductDownloadUrls } from "@/lib/product-downloads";
 import { decryptDownloadToken } from "@/lib/security";
 
 export async function GET(request: NextRequest) {
@@ -40,7 +41,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Order not paid" }, { status: 403 });
     }
 
-    return NextResponse.redirect(product.downloadUrl);
+    const urls = getProductDownloadUrls(product);
+    const partIndex = payload.partIndex ?? Number(request.nextUrl.searchParams.get("part") ?? 0);
+    const downloadUrl = urls[partIndex];
+
+    if (!downloadUrl) {
+      return NextResponse.json({ error: "Download part not found" }, { status: 404 });
+    }
+
+    return NextResponse.redirect(downloadUrl);
   } catch (error) {
     console.error("Download token validation failed:", error);
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });

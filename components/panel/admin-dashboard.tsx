@@ -4,14 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
+  adminResetCustomerPasswordAction,
   createCategoryAction,
+  createCustomerAccountAction,
   createProductAction,
+  deleteCategoryAction,
+  deleteProductAction,
   logoutAdmin,
   updateGalleryAction,
   updateOrderStatusAction,
   updateTicketStatusAction,
   updateWebsiteDetailsAction,
 } from "@/lib/actions";
+import { MultiDownloadUrlFields } from "@/components/panel/multi-download-url-fields";
+import { formatOrderDate, formatPrice } from "@/lib/utils";
 import { panelSections, type PanelSection } from "@/lib/panel-nav";
 import { paletteOptions } from "@/lib/theme";
 import type { Category, Order, Product, SiteSettings, SupportTicket } from "@/lib/types";
@@ -34,6 +40,14 @@ const accents = [
   "from-rose-400 via-red-500 to-yellow-400",
 ];
 
+type CustomerProfile = {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  createdAt: string;
+};
+
 type AdminDashboardProps = {
   initialSection: PanelSection;
   success?: string;
@@ -44,6 +58,7 @@ type AdminDashboardProps = {
   settings: SiteSettings;
   orders: Order[];
   tickets: SupportTicket[];
+  customers: CustomerProfile[];
 };
 
 function SectionHeader({ title, description }: { title: string; description?: string }) {
@@ -75,6 +90,7 @@ export function AdminDashboard({
   settings,
   orders,
   tickets,
+  customers,
 }: AdminDashboardProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -91,6 +107,10 @@ export function AdminDashboard({
   }
 
   const openTickets = tickets.filter((ticket) => ticket.status === "open").length;
+  const totalEarnings = orders
+    .filter((order) => order.status === "paid")
+    .reduce((sum, order) => sum + order.amount, 0);
+  const paidOrders = orders.filter((order) => order.status === "paid").length;
 
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
@@ -151,7 +171,9 @@ export function AdminDashboard({
               title="Overview"
               description="Quick snapshot of your store — jump to any section from the sidebar."
             />
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+              <StatCard label="Total earnings" value={formatPrice(totalEarnings)} hint={`${paidOrders} paid orders`} />
+              <StatCard label="Customers" value={customers.length} hint="Registered user profiles" />
               <StatCard label="Products" value={products.length} hint="Published on homepage" />
               <StatCard label="Categories" value={categories.length} hint="Product groups" />
               <StatCard label="Orders" value={orders.length} hint="All buyer payments" />
@@ -170,7 +192,7 @@ export function AdminDashboard({
                           {order.items.map((item) => item.title).join(", ")}
                         </p>
                         <p className="mt-1 text-xs text-slate-500">
-                          {order.customerName} · ₹{order.amount}
+                          {order.customerName} · ₹{order.amount} · {formatOrderDate(order.createdAt)}
                         </p>
                       </div>
                     ))
@@ -282,9 +304,17 @@ export function AdminDashboard({
               <div className="space-y-3">
                 {categories.map((category) => (
                   <div key={category.id} className={dashboardItemClass}>
-                    <p className="font-semibold text-slate-900">{category.name}</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-orange-600">{category.slug}</p>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">{category.description}</p>
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-slate-900">{category.name}</p>
+                        <p className="mt-1 text-xs uppercase tracking-[0.2em] text-orange-600">{category.slug}</p>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">{category.description}</p>
+                      </div>
+                      <form action={deleteCategoryAction}>
+                        <input type="hidden" name="categoryId" value={category.id} />
+                        <button type="submit" className={dashboardBtnSecondaryClass}>Delete</button>
+                      </form>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -309,7 +339,7 @@ export function AdminDashboard({
                 <input required type="number" min="1" name="price" placeholder="Price in INR" className={dashboardInputClass} />
                 <input name="accent" placeholder={accents[0]} className={dashboardInputClass} />
                 <input required name="youtubeUrl" placeholder="YouTube demo URL" className={`md:col-span-2 ${dashboardInputClass}`} />
-                <input required name="downloadUrl" placeholder="Protected file URL" className={`md:col-span-2 ${dashboardInputClass}`} />
+                <MultiDownloadUrlFields />
                 <input required name="downloadPassword" placeholder="Download password" className={dashboardInputClass} />
                 <input name="videoPassword" placeholder="Video password or note" className={dashboardInputClass} />
                 <textarea required rows={3} name="shortDescription" placeholder="Short description" className={`md:col-span-2 ${dashboardInputClass}`} />
@@ -324,14 +354,92 @@ export function AdminDashboard({
               <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {products.map((product) => (
                   <div key={product.id} className={dashboardItemClass}>
-                    <p className="font-semibold text-slate-900">{product.title}</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.2em] text-orange-600">
-                      {product.format} · {product.categorySlug}
-                    </p>
-                    <p className="mt-2 text-sm text-slate-600">{product.shortDescription}</p>
-                    <p className="mt-2 text-sm font-semibold text-slate-900">₹{product.price}</p>
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="font-semibold text-slate-900">{product.title}</p>
+                        <p className="mt-1 text-xs uppercase tracking-[0.2em] text-orange-600">
+                          {product.format} · {product.categorySlug}
+                        </p>
+                        <p className="mt-2 text-sm text-slate-600">{product.shortDescription}</p>
+                        <p className="mt-2 text-sm font-semibold text-slate-900">₹{product.price}</p>
+                        {(product.downloadUrls?.length ?? 0) > 1 ? (
+                          <p className="mt-1 text-xs text-slate-500">
+                            {product.downloadUrls?.length} download parts
+                          </p>
+                        ) : null}
+                      </div>
+                      <form action={deleteProductAction}>
+                        <input type="hidden" name="productId" value={product.id} />
+                        <button type="submit" className={dashboardBtnSecondaryClass}>Delete</button>
+                      </form>
+                    </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {activeSection === "customers" ? (
+          <div className="grid gap-6 xl:grid-cols-[1fr_1.2fr]">
+            <div className={dashboardCardClass}>
+              <SectionHeader
+                title="Create customer account"
+                description="Admin can create a login for a buyer — email or mobile plus password."
+              />
+              <form action={createCustomerAccountAction} className="space-y-4">
+                <input required name="name" placeholder="Customer full name" className={dashboardInputClass} />
+                <input type="email" name="email" placeholder="Email (optional)" className={dashboardInputClass} />
+                <input name="phone" placeholder="Mobile number (optional)" className={dashboardInputClass} />
+                <input
+                  required
+                  type="password"
+                  name="password"
+                  minLength={6}
+                  placeholder="Password (min 6 characters)"
+                  className={dashboardInputClass}
+                />
+                <p className="text-xs text-slate-500">At least one of email or mobile is required.</p>
+                <button type="submit" className={dashboardBtnPrimaryClass}>Create customer account</button>
+              </form>
+            </div>
+
+            <div className={dashboardCardClass}>
+              <SectionHeader
+                title={`All customers (${customers.length})`}
+                description="View profiles and reset passwords when a buyer forgets login."
+              />
+              <div className="space-y-4">
+                {customers.length === 0 ? (
+                  <p className="text-sm text-slate-500">No customer accounts yet.</p>
+                ) : (
+                  customers.map((customer) => (
+                    <div key={customer.id} className={dashboardItemClass}>
+                      <p className="font-semibold text-slate-900">{customer.name}</p>
+                      <p className="mt-1 text-sm text-slate-600">
+                        {customer.email || "No email"} · {customer.phone || "No mobile"}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        Joined {formatOrderDate(customer.createdAt)}
+                      </p>
+                      <form
+                        action={adminResetCustomerPasswordAction}
+                        className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]"
+                      >
+                        <input type="hidden" name="userId" value={customer.id} />
+                        <input
+                          required
+                          type="password"
+                          name="password"
+                          minLength={6}
+                          placeholder="New password for customer"
+                          className={dashboardInputClass}
+                        />
+                        <button type="submit" className={dashboardBtnSecondaryClass}>Set / reset password</button>
+                      </form>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -353,7 +461,12 @@ export function AdminDashboard({
                         <p className="mt-2 text-sm text-slate-600">
                           {order.customerName} · {order.customerPhone} · {order.customerEmail}
                         </p>
-                        <p className="mt-1 text-sm text-slate-500">₹{order.amount}</p>
+                        <p className="mt-1 text-sm text-slate-500">
+                          {formatPrice(order.amount)} · {formatOrderDate(order.createdAt)}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          Status: {order.status} · Download: {order.downloadStatus}
+                        </p>
                       </div>
                     </div>
                     <form action={updateOrderStatusAction} className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto]">

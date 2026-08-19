@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/data-store";
 import MouseCursor from "@/components/mouse-cursor";
+import { AuthSessionProvider } from "@/components/auth/session-provider";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -24,8 +25,10 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-slate-50 text-slate-900">
-        <MouseCursor />
-        {children}
+        <AuthSessionProvider>
+          <MouseCursor />
+          {children}
+        </AuthSessionProvider>
       </body>
     </html>
   );

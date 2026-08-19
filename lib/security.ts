@@ -5,6 +5,7 @@ export type DownloadTokenPayload = {
   orderId: string;
   productSlug: string;
   expiresAt: number;
+  partIndex?: number;
 };
 
 function base64UrlEncode(value: Buffer) {
@@ -56,4 +57,17 @@ export function decryptDownloadToken(token: string) {
   ]);
 
   return JSON.parse(decrypted.toString("utf8")) as DownloadTokenPayload;
+}
+
+export function hashPassword(password: string) {
+  const salt = randomBytes(16);
+  const hash = scryptSync(password, salt, 64);
+  return `${salt.toString("hex")}:${hash.toString("hex")}`;
+}
+
+export function verifyPassword(password: string, storedHash: string) {
+  const [saltHex, hashHex] = storedHash.split(":");
+  if (!saltHex || !hashHex) return false;
+  const hash = scryptSync(password, Buffer.from(saltHex, "hex"), 64);
+  return hash.toString("hex") === hashHex;
 }

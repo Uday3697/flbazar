@@ -108,3 +108,29 @@ button:hover {
 iframe {
   border: 0;
 }
+
+@keyframes neon-shimmer {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.neon-credit-text {
+  background-image: linear-gradient(
+    90deg,
+    #4ade80 0%,
+    #22c55e 20%,
+    #a855f7 50%,
+    #c084fc 80%,
+    #4ade80 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #4ade80;
+  animation: neon-shimmer 4s linear infinite;
+}

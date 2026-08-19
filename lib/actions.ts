@@ -2,17 +2,23 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { signOut } from "@/lib/auth";
 import {
   createCategory,
   createOrder,
   createProduct,
   createSupportTicket,
+  createUser,
+  deleteCategoryById,
+  deleteProductById,
   getProductBySlug,
+  resetUserPasswordByLogin,
   updateOrderStatus,
   updateSiteSettings,
   updateTicketStatus,
+  updateUserPassword,
 } from "@/lib/data-store";
-import { createAdminSessionToken, isAdminAuthenticated } from "@/lib/security";
+import { createAdminSessionToken, hashPassword, isAdminAuthenticated } from "@/lib/security";
 import type { DownloadStatus, OrderStatus, SiteSettings, SupportTicket } from "@/lib/types";
 import { panelPath, type PanelSection } from "@/lib/panel-nav";
 
@@ -51,6 +57,21 @@ export async function logoutAdmin() {
   redirect("/panel?success=Logged%20out");
 }
 
+function collectDownloadUrls(formData: FormData) {
+  const urls: string[] = [];
+  for (let index = 1; index <= 5; index += 1) {
+    const url = String(formData.get(`downloadUrl${index}`) || "").trim();
+    if (url) urls.push(url);
+  }
+  const legacy = String(formData.get("downloadUrl") || "").trim();
+  if (urls.length === 0 && legacy) urls.push(legacy);
+  return urls;
+}
+
+export async function logoutUserAction() {
+  await signOut({ redirectTo: "/" });
+}
+
 export async function createCategoryAction(formData: FormData) {
   if (!(await isAdminAuthenticated())) {
     panelRedirect("categories", { error: "Please login again" });
@@ -80,7 +101,7 @@ export async function createProductAction(formData: FormData) {
   const shortDescription = String(formData.get("shortDescription") || "");
   const description = String(formData.get("description") || "");
   const youtubeUrl = String(formData.get("youtubeUrl") || "");
-  const downloadUrl = String(formData.get("downloadUrl") || "");
+  const downloadUrls = collectDownloadUrls(formData);
   const downloadPassword = String(formData.get("downloadPassword") || "");
   const videoPassword = String(formData.get("videoPassword") || "");
   const accent = String(formData.get("accent") || "");
@@ -93,9 +114,9 @@ export async function createProductAction(formData: FormData) {
     !shortDescription ||
     !description ||
     !youtubeUrl ||
-    !downloadUrl ||
     !downloadPassword ||
-    !price
+    !price ||
+    downloadUrls.length === 0
   ) {
     panelRedirect("products", { error: "Please fill all required product fields" });
   }
@@ -109,13 +130,50 @@ export async function createProductAction(formData: FormData) {
     shortDescription,
     description,
     youtubeUrl,
-    downloadUrl,
+    downloadUrl: downloadUrls[0],
+    downloadUrls,
     downloadPassword,
     videoPassword,
     accent,
   });
 
   panelRedirect("products", { success: "Product published" });
+}
+
+export async function deleteProductAction(formData: FormData) {
+  if (!(await isAdminAuthenticated())) {
+    panelRedirect("products", { error: "Please login again" });
+  }
+
+  const productId = String(formData.get("productId") || "");
+  if (!productId) {
+    panelRedirect("products", { error: "Product not found" });
+  }
+
+  const deleted = await deleteProductById(productId);
+  if (!deleted) {
+    panelRedirect("products", { error: "Could not delete product" });
+  }
+
+  panelRedirect("products", { success: "Product deleted" });
+}
+
+export async function deleteCategoryAction(formData: FormData) {
+  if (!(await isAdminAuthenticated())) {
+    panelRedirect("categories", { error: "Please login again" });
+  }
+
+  const categoryId = String(formData.get("categoryId") || "");
+  if (!categoryId) {
+    panelRedirect("categories", { error: "Category not found" });
+  }
+
+  const result = await deleteCategoryById(categoryId);
+  if (!result.ok) {
+    panelRedirect("categories", { error: result.error || "Could not delete category" });
+  }
+
+  panelRedirect("categories", { success: "Category deleted" });
 }
 
 export async function updateWebsiteDetailsAction(formData: FormData) {
@@ -299,4 +357,77 @@ export async function updateTicketStatusAction(formData: FormData) {
 
   await updateTicketStatus(ticketId, status);
   panelRedirect("support", { success: "Ticket updated" });
+}
+
+export async function createCustomerAccountAction(formData: FormData) {
+  if (!(await isAdminAuthenticated())) {
+    panelRedirect("customers", { error: "Please login again" });
+  }
+
+  const name = String(formData.get("name") || "").trim();
+  const email = String(formData.get("email") || "").trim();
+  const phone = String(formData.get("phone") || "").trim();
+  const password = String(formData.get("password") || "");
+
+  if (!name || !password || password.length < 6) {
+    panelRedirect("customers", { error: "Name and password (min 6 chars) are required" });
+  }
+
+  if (!email && !phone) {
+    panelRedirect("customers", { error: "Email or mobile number is required" });
+  }
+
+  try {
+    await createUser({
+      name,
+      email: email || undefined,
+      phone: phone || undefined,
+      passwordHash: hashPassword(password),
+    });
+    panelRedirect("customers", { success: "Customer account created" });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Could not create account";
+    panelRedirect("customers", { error: message });
+  }
+}
+
+export async function adminResetCustomerPasswordAction(formData: FormData) {
+  if (!(await isAdminAuthenticated())) {
+    panelRedirect("customers", { error: "Please login again" });
+  }
+
+  const userId = String(formData.get("userId") || "");
+  const password = String(formData.get("password") || "");
+
+  if (!userId || !password || password.length < 6) {
+    panelRedirect("customers", { error: "Valid customer and password (min 6 chars) required" });
+  }
+
+  const updated = await updateUserPassword(userId, hashPassword(password));
+  if (!updated) {
+    panelRedirect("customers", { error: "Customer not found" });
+  }
+
+  panelRedirect("customers", { success: "Password updated for customer" });
+}
+
+export async function forgotPasswordAction(formData: FormData) {
+  const login = String(formData.get("login") || "").trim();
+  const password = String(formData.get("password") || "");
+  const confirmPassword = String(formData.get("confirmPassword") || "");
+
+  if (!login || !password || password.length < 6) {
+    redirect("/forgot-password?error=Enter+email/mobile+and+password+(min+6+chars)");
+  }
+
+  if (password !== confirmPassword) {
+    redirect("/forgot-password?error=Passwords+do+not+match");
+  }
+
+  const result = await resetUserPasswordByLogin(login, hashPassword(password));
+  if (!result.ok) {
+    redirect(`/forgot-password?error=${encodeURIComponent(result.error || "Reset failed")}`);
+  }
+
+  redirect("/login?success=Password+reset.+You+can+login+now");
 }

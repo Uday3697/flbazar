@@ -16,9 +16,22 @@ export type Product = {
   description: string;
   youtubeUrl: string;
   downloadUrl: string;
+  /** Optional multi-part download URLs (part 1–5). Falls back to downloadUrl when empty. */
+  downloadUrls?: string[];
   downloadPassword: string;
   videoPassword: string;
   accent: string;
+  createdAt: string;
+};
+
+export type User = {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  passwordHash?: string;
+  googleId?: string;
+  image?: string;
   createdAt: string;
 };
 
@@ -34,6 +47,7 @@ export type OrderItem = {
 export type Order = {
   id: string;
   items: OrderItem[];
+  userId?: string;
   customerName: string;
   customerEmail: string;
   customerPhone: string;

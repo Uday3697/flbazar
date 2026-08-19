@@ -1,0 +1,39 @@
+import { NextRequest, NextResponse } from "next/server";
+import { createUser } from "@/lib/data-store";
+import { hashPassword } from "@/lib/security";
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const name = String(body.name || "").trim();
+    const email = String(body.email || "").trim();
+    const phone = String(body.phone || "").trim();
+    const password = String(body.password || "");
+
+    if (!name || !password || password.length < 6) {
+      return NextResponse.json(
+        { error: "Name and password (min 6 characters) are required" },
+        { status: 400 },
+      );
+    }
+
+    if (!email && !phone) {
+      return NextResponse.json(
+        { error: "Email or mobile number is required" },
+        { status: 400 },
+      );
+    }
+
+    const user = await createUser({
+      name,
+      email: email || undefined,
+      phone: phone || undefined,
+      passwordHash: hashPassword(password),
+    });
+
+    return NextResponse.json({ success: true, userId: user.id });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Signup failed";
+    return NextResponse.json({ error: message }, { status: 400 });
+  }
+}
