@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { HeaderMobile } from "@/components/header-mobile";
 import { getSiteSettings, getUserById } from "@/lib/data-store";
 import { auth } from "@/lib/auth";
 import { logoutUserAction } from "@/lib/actions";
@@ -33,9 +34,23 @@ export async function Header() {
   const user = session?.user?.id ? await getUserById(session.user.id) : null;
   const displayName = user?.name || session?.user?.name || "Account";
 
+  const profileInitials = getProfileInitials(displayName);
+
   return (
     <header className="sticky top-0 z-40 border-b border-slate-800 bg-slate-950 shadow-md">
-      <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-4 lg:px-10">
+      <div className="relative lg:hidden">
+        <HeaderMobile
+          brandName={settings.brandName}
+          sellerName={settings.sellerName}
+          seoTags={seoTags}
+          navItems={navItems}
+          isLoggedIn={Boolean(session?.user)}
+          displayName={displayName}
+          profileInitials={profileInitials}
+        />
+      </div>
+
+      <div className="mx-auto hidden w-full max-w-7xl flex-wrap items-center justify-between gap-4 px-6 py-4 lg:flex lg:px-10">
         <Link href="/" className="flex items-center gap-3 min-w-0">
           <Image
             src="/favicon-logo.png"
@@ -90,7 +105,7 @@ export async function Header() {
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 via-fuchsia-500 to-purple-600 text-xs font-black uppercase text-white shadow-md ring-2 ring-orange-400/30"
                   aria-hidden="true"
                 >
-                  {getProfileInitials(displayName)}
+                  {profileInitials}
                 </span>
                 <span className="max-w-[9rem] truncate font-semibold text-orange-100 sm:max-w-[11rem]">
                   {displayName}
